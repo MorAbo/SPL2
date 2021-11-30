@@ -1,5 +1,8 @@
 package bgu.spl.mics.application.objects;
 
+import bgu.spl.mics.application.services.GPUService;
+import com.sun.tools.javac.util.List;
+
 /**
  * Passive object representing a single GPU.
  * Add all the fields described in the assignment as private fields.
@@ -17,11 +20,34 @@ public class GPU {
 
     private Cluster cluster;
 
+    private GPUService ms;
+
+    private List<DataBatch> Disk;
+
+
+    public GPU(){
+        //bus.register ms to train and to test
+    }
+
+    /*
+    devided the data in model to baches of 1000 and
+    stores it in the disk
+     */
+    public void devideData(){
+
+    }
+
+    /*
+    sets the model we are currnetly working on
+     */
+    public void SetModel(){
+
+    }
+
     /**
      * Sends chunks of unprocessed data from the model of batches of 1000 samples using DataBatch
      * to the cluster
      * GPU will only send data if it has room to store it when it returns
-
      */
     public void SendData(){
 
@@ -35,8 +61,14 @@ public class GPU {
      */
     public  void reciveProcesedData(Data d){
         //wait(time by the type)
-        //model.train(d)
+        //model.data=data
+
     }
+
+
+
+
+
 
 
 

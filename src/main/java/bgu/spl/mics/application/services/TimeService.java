@@ -14,7 +14,6 @@ import bgu.spl.mics.MicroService;
  */
 public class TimeService extends MicroService{
 
-	private MessageBusImpl bus = MessageBusImpl.GetInstance();
 
 	public TimeService() {
 		super("Change_This_Name");

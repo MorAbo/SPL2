@@ -6,5 +6,8 @@ package bgu.spl.mics.application.objects;
  */
 
 public class DataBatch {
+
+    private Data data;
+    private int start_index;
     
 }

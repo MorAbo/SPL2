@@ -11,7 +11,6 @@ import bgu.spl.mics.MicroService;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class CPUService extends MicroService {
-    private MessageBusImpl bus = MessageBusImpl.GetInstance();
 
 
     public CPUService(String name) {

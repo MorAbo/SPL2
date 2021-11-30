@@ -13,7 +13,6 @@ import bgu.spl.mics.MicroService;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class ConferenceService extends MicroService {
-    private MessageBusImpl bus = MessageBusImpl.GetInstance();
 
     public ConferenceService(String name) {
         super("Change_This_Name");

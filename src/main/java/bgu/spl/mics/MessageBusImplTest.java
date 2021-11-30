@@ -147,11 +147,11 @@ class MessageBusImplTest {
 
     @Test
     void register() {
-        //test 1: if already registered - dont do anything
+        //test 1: register and see its in microservices
         MicroService m1 = new StudentService("S1");
         mb.register(m1);
         assertEquals();     //m1 is in microservices
-        //test 2: register and see its in microservices
+        //test 2: if already registered - dont do anything
         mb.register(m1);
         assertEquals();     //m1 is in microservices only once
 

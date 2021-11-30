@@ -22,6 +22,7 @@ public abstract class MicroService implements Runnable {
 
     private boolean terminated = false;
     private final String name;
+    private MessageBusImpl bus = MessageBusImpl.GetInstance();
 
     /**
      * @param name the micro-service name (used mainly for debugging purposes -
@@ -29,6 +30,7 @@ public abstract class MicroService implements Runnable {
      */
     public MicroService(String name) {
         this.name = name;
+//        MessageBusImpl.GetInstance().register(this);
     }
 
     /**
@@ -78,6 +80,7 @@ public abstract class MicroService implements Runnable {
      */
     protected final <B extends Broadcast> void subscribeBroadcast(Class<B> type, Callback<B> callback) {
         //TODO: implement this.
+        //bus.subscribebroadcast(type,this)
     }
 
     /**
@@ -151,6 +154,7 @@ public abstract class MicroService implements Runnable {
         initialize();
         while (!terminated) {
             System.out.println("NOT IMPLEMENTED!!!"); //TODO: you should delete this line :)
+            //registration, initialize, unregister
         }
     }
 

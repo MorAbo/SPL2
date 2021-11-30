@@ -14,8 +14,6 @@ import bgu.spl.mics.MicroService;
  */
 public class StudentService extends MicroService {
 
-    private MessageBusImpl bus = MessageBusImpl.GetInstance();
-
     public StudentService(String name) {
         super("Change_This_Name");
         // TODO Implement this

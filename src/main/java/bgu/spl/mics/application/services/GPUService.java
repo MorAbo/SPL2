@@ -14,17 +14,17 @@ import bgu.spl.mics.MicroService;
  */
 public class GPUService extends MicroService {
 
-    private MessageBusImpl bus = MessageBusImpl.GetInstance();
-
 
     public GPUService(String name) {
         super("Change_This_Name");
         // TODO Implement this
+
     }
 
     @Override
     protected void initialize() {
         // TODO Implement this
+
 
     }
 }
