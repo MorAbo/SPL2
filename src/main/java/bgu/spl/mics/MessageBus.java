@@ -48,7 +48,7 @@ public interface MessageBus {
      *
      * @pre future in event is null
      * @post future in event isnt null
-     * @post if @pre(future in event) isnt null, do nothing
+     * @post if @pre(future in event) isn't null, do nothing
      */
     <T> void complete(Event<T> e, T result);
 

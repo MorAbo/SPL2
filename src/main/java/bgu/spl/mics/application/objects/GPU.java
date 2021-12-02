@@ -1,7 +1,5 @@
 package bgu.spl.mics.application.objects;
 
-import bgu.spl.mics.application.services.GPUService;
-import com.sun.tools.javac.util.List;
 
 import java.util.LinkedList;
 
@@ -26,8 +24,8 @@ public class GPU {
 
     private LinkedList<DataBatch> VRAM;
 
-    public GPU(Type type){
-        this.type = type;
+    public GPU(String type){
+    //    this.type = type;
         cluster = Cluster.getInstance();
         Disk = new LinkedList<>();
         VRAM = new LinkedList<>();
