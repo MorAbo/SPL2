@@ -3,6 +3,8 @@ package bgu.spl.mics.application.objects;
 import bgu.spl.mics.application.services.GPUService;
 import com.sun.tools.javac.util.List;
 
+import java.util.LinkedList;
+
 /**
  * Passive object representing a single GPU.
  * Add all the fields described in the assignment as private fields.
@@ -16,31 +18,39 @@ public class GPU {
 
     private Type type;
 
-    private Model model;
+    public Model model;
 
     private Cluster cluster;
 
-    private GPUService ms;
+    public LinkedList<DataBatch> Disk;
 
-    private List<DataBatch> Disk;
+    private LinkedList<DataBatch> VRAM;
 
-
-    public GPU(){
-        //bus.register ms to train and to test
+    public GPU(Type type){
+        this.type = type;
+        cluster = Cluster.getInstance();
+        Disk = new LinkedList<>();
+        VRAM = new LinkedList<>();
+        model = null;
     }
 
-    /*
-    devided the data in model to baches of 1000 and
+    /**
+     *
+     * @param model = model to operate on.
+     * @post model == model
+     */
+    public void setModel(Model model){
+        this.model = model;
+    }
+
+    /**
+    divided the data in model to batches of 1000 and
     stores it in the disk
+     * @pre DISK.isEmpty();
+     * @post DISK.size() == Math.ceil(model.data.size() / 1000)
+     * @post DISK[i] == databatch(model.data, i * 1000)
      */
-    public void devideData(){
-
-    }
-
-    /*
-    sets the model we are currnetly working on
-     */
-    public void SetModel(){
+    public void divideData(){
 
     }
 
@@ -48,6 +58,8 @@ public class GPU {
      * Sends chunks of unprocessed data from the model of batches of 1000 samples using DataBatch
      * to the cluster
      * GPU will only send data if it has room to store it when it returns
+     * @pre model.data.processed == 0
+     * @post Disk.isEmpty()
      */
     public void SendData(){
 
@@ -58,18 +70,15 @@ public class GPU {
     /**
      * after the cluster completed the task it will set the future of TrainModelEvent
      * as complete.
+     * @pre model.data.processed == 0
+     * @post model.data.processed == model.data.size
+     * @post
      */
-    public  void reciveProcesedData(Data d){
+    public void receiveProcessedData(Data d){
         //wait(time by the type)
+        //data.proccess = size
         //model.data=data
 
     }
-
-
-
-
-
-
-
 
 }

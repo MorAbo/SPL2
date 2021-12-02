@@ -2,6 +2,7 @@ package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.objects.GPU;
 
 /**
  * GPU service is responsible for handling the
@@ -13,6 +14,8 @@ import bgu.spl.mics.MicroService;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class GPUService extends MicroService {
+
+    private GPU gpu;
 
 
     public GPUService(String name) {

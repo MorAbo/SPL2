@@ -118,5 +118,12 @@ public interface MessageBus {
      *                              to became available.
      */
     Message awaitMessage(MicroService m) throws InterruptedException;
+
+    /**
+     * using this method you can query whether a microservice is registered to the message bus
+     * @param m The micro-service on questione whether its registered
+     * @return true if m is registered to the messagebus and false otherwise
+     */
+    boolean IsRegistered(MicroService m);
     
 }
