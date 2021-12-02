@@ -13,4 +13,8 @@ public class ConfrenceInformation {
         this.name = name;
         this.date = date;
     }
+
+    public String getName(){return name;}
+
+    public int getDate(){return date;}
 }

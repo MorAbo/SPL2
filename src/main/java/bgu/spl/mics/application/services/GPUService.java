@@ -2,6 +2,8 @@ package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.TestModelEvent;
+import bgu.spl.mics.application.messages.TrainModelEvent;
 import bgu.spl.mics.application.objects.GPU;
 
 /**
@@ -17,11 +19,11 @@ public class GPUService extends MicroService {
 
     private GPU gpu;
 
-
-    public GPUService(String name) {
-        super("Change_This_Name");
+    public GPUService(String name, GPU gpu) {
+        super(name);
         // TODO Implement this
-
+        this.gpu = gpu;
+        MessageBusImpl.GetInstance().register(this);
     }
 
     @Override

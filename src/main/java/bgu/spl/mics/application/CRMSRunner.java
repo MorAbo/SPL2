@@ -1,9 +1,8 @@
 package bgu.spl.mics.application;
 
-import bgu.spl.mics.MessageBus;
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.application.objects.*;
-import bgu.spl.mics.application.services.TimeService;
+import bgu.spl.mics.application.services.*;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -19,11 +18,15 @@ import java.io.FileReader;
  */
 public class CRMSRunner {
     public static void main(String[] args) {
-        JsonParser parser = new JsonParser();
-        try {
-            MessageBus messageBus = MessageBusImpl.GetInstance();
+        initializeBus(args[0]);
+    }
 
-            Object obj = parser.parse(new FileReader(args[0]));
+    private static void initializeBus(String arg){
+        try {
+            MessageBusImpl messageBus = MessageBusImpl.GetInstance();
+
+            JsonParser parser = new JsonParser();
+            Object obj = parser.parse(new FileReader(arg));
             JsonObject jsonObject = (JsonObject) obj;
 
             JsonArray studentsArray = (JsonArray) jsonObject.get("Students");
@@ -42,6 +45,8 @@ public class CRMSRunner {
 
             int duration = jsonObject.get("Duration").getAsInt();
 
+            TimeService timeService = new TimeService(tickTime, duration);
+            messageBus.register(timeService);
         }
         catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -49,12 +54,15 @@ public class CRMSRunner {
     }
 
     private static void parseStudents(JsonArray studentsArray) {
+        MessageBusImpl messageBus = MessageBusImpl.GetInstance();
         for (JsonElement studentElement : studentsArray) {
             JsonObject JSonStudent = studentElement.getAsJsonObject();
             String name = JSonStudent.get("name").getAsString();
             String department = JSonStudent.get("department").getAsString();
             String status = JSonStudent.get("status").getAsString();
             Student student = new Student(name, department, status);
+            StudentService studentService = new StudentService("student service", student);
+            messageBus.register(studentService);
             JsonArray modelsArray = (JsonArray) JSonStudent.get("models");
             for (JsonElement modelElement : modelsArray) {
                 JsonObject JSonModel = modelElement.getAsJsonObject();
@@ -69,25 +77,34 @@ public class CRMSRunner {
     }
 
     private static void parseGpus(JsonArray gpusArray){
+        MessageBusImpl messageBus = MessageBusImpl.GetInstance();
         for (JsonElement gpuElement : gpusArray){
             String gpuType = gpuElement.getAsString();
             GPU gpu = new GPU(gpuType);
+            GPUService gpuService = new GPUService("gpu service", gpu);
+            messageBus.register(gpuService);
         }
     }
 
     private static void parseCpus(JsonArray cpusArray){
+        MessageBusImpl messageBus = MessageBusImpl.GetInstance();
         for (JsonElement cpuElement : cpusArray){
             int cpuSize = cpuElement.getAsInt();
             CPU cpu = new CPU(cpuSize);
+            CPUService cpuService = new CPUService("cpu service", cpu);
+            messageBus.register(cpuService);
         }
     }
 
     private static void parseConferences(JsonArray conferencesArray){
+        MessageBusImpl messageBus = MessageBusImpl.GetInstance();
         for (JsonElement conferenceElement : conferencesArray){
             JsonObject JSonConference = conferenceElement.getAsJsonObject();
             String name = JSonConference.get("name").getAsString();
             int date = JSonConference.get("date").getAsInt();
             ConfrenceInformation confrenceInformation = new ConfrenceInformation(name, date);
+            ConferenceService conferenceService = new ConferenceService("conference service", confrenceInformation);
+            messageBus.register(conferenceService);
         }
     }
 

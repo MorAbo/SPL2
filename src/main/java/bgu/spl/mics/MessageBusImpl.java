@@ -1,6 +1,7 @@
 package bgu.spl.mics;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
@@ -11,9 +12,9 @@ import java.util.Queue;
  */
 public class MessageBusImpl implements MessageBus {
 
-	private HashMap<MicroService, Queue<Message>> microservices=null;
-	private HashMap<Class<? extends Event<?>>, List<MicroService>> events=null;
-	private HashMap<Class<? extends Broadcast>, List<MicroService>> broadcasts=null;
+	private HashMap<MicroService, Queue<Message>> microservices;
+	private HashMap<Class<? extends Event<?>>, List<MicroService>> events;
+	private HashMap<Class<? extends Broadcast>, List<MicroService>> broadcasts;
 	private final static MessageBusImpl INSTANCE = new MessageBusImpl();
 
 	private  MessageBusImpl(){
@@ -69,7 +70,10 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public void register(MicroService m) {
 		// TODO Auto-generated method stub
-		//syncronized on microservices
+		//synchronized on microservices
+		if (!microservices.containsKey(m)){
+			microservices.put(m, new LinkedList<>());
+		}
 	}
 
 	@Override

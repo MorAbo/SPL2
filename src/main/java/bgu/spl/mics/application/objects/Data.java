@@ -28,12 +28,15 @@ public class Data {
 
     private void setType(String resultString){
         switch (resultString) {
+            case "images":
             case "Images":
                 type = Type.Images;
                 break;
+            case "text":
             case "Text":
                 type = Type.Text;
                 break;
+            case "tabular":
             case "Tabular":
                 type = Type.Tabular;
                 break;
