@@ -141,5 +141,10 @@ public interface MessageBus {
      * @return true if m is subscribed to the type and false otherwise
      */
      boolean IsSubscribedBroadcast(Class<? extends Broadcast> type, MicroService m);
-    
+
+    /**
+     * clears the object to its oreginal (when created) state
+     */
+    void Clear();
+
 }

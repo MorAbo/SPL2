@@ -15,10 +15,12 @@ class GPUTest {
 
     @BeforeEach
     void setUp() {
-//        gpu3090 = new GPU(GPU.Type.RTX3090);
-//        gpu2080 = new GPU(GPU.Type.RTX2080);
-//        gpu1080 = new GPU(GPU.Type.GTX1080);
-//        model = new Model();
+        gpu3090 = new GPU("RTX3090");
+        gpu2080 = new GPU("RTX2080");
+        gpu1080 = new GPU("GTX1080");
+        model = new Model("model1",
+                new Data("Images", 3000),
+                new Student("studen 1", "CS", "PhD"));
     }
 
     @AfterEach
@@ -26,19 +28,10 @@ class GPUTest {
     }
 
     @Test
-    void setModel() {
-        gpu3090.setModel(model);
-        assertEquals(model, gpu3090.model);
-    }
-
-    @Test
     void divideData() {
-//        gpu3090.setModel(model);
-//        gpu3090.divideData();
-//        assertEquals(gpu3090.Disk.size(), Math.ceil(model.data.getSize() / 1000));
-//        for (int i = 0; i < gpu3090.Disk.size(); i++) {
-//            assertEquals(gpu3090.Disk.get(i), new DataBatch(model.data, 1000 * i));
-//        }
+        gpu3090.setModel(model);
+        gpu3090.divideData();
+        assertEquals(gpu3090.DiskCapacity(), Math.ceil((float)(model.GetData().getSize()) / 1000));
     }
 
     @Test
@@ -46,11 +39,23 @@ class GPUTest {
         gpu3090.setModel(model);
         gpu3090.divideData();
         gpu3090.SendData();
-        assertTrue(gpu3090.Disk.isEmpty());
+        assertEquals(gpu3090.DiskCapacity(), 0);
     }
 
     @Test
     void reciveProcesedData() {
+        int oldvramcapacity = gpu3090.VramCapacityLeft();
+        gpu3090.receiveProcessedData(new DataBatch(new Data("Images",1000), 0));
+        assertEquals(gpu3090.VramCapacityLeft(), oldvramcapacity+1);
     }
+
+    @Test
+    void Train() {
+        gpu3090.setModel(model);
+        Model m = gpu3090.Train();
+        assertEquals(m.GetData().getProcessed(), model.GetData().getSize());
+
+    }
+
 
 }

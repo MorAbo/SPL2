@@ -23,8 +23,10 @@ public class Data {
     }
 
     public Type getType(){ return type;}
-
+    public int getProcessed(){return processed;}
     public int getSize(){return size;}
+
+    public void ProcessData(int amount){ processed+=amount; }
 
     private void setType(String resultString){
         switch (resultString) {
@@ -42,4 +44,5 @@ public class Data {
                 break;
         }
     }
+
 }

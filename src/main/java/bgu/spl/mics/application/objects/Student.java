@@ -20,6 +20,8 @@ public class Student {
     private Degree status;
     private int publications;
     private int papersRead;
+    private int tick;
+
     private List<Model> models;
 
     public Student(String name, String department, String degree){
@@ -29,6 +31,7 @@ public class Student {
         papersRead = 0;
         models = new LinkedList();
         setDegree(degree);
+        tick=0;
     }
 
     public void addModel(Model model){

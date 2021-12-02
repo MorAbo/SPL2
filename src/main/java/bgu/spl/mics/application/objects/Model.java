@@ -23,6 +23,8 @@ public class Model {
         setStatus("PreTrained");
         setResult("None");
     }
+    public void ProcessData(int amount){ data.ProcessData(amount);}
+    public Data GetData(){ return data;}
 
     public void setStatus(String statusString){
         switch (statusString) {
