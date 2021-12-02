@@ -22,13 +22,13 @@ class CPUTest {
     @Test
     void receiveData() {
         int oldDataAmount = cpu.dataInLine();
-        cpu.receiveData(new DataBatch(new Data(Data.Type.Images, 1000), 0));
+        cpu.receiveData(new DataBatch(new Data("Images", 1000), 0));
         assertEquals(cpu.dataInLine(), oldDataAmount+1);
     }
 
     @Test
     void processData() {
-        cpu.receiveData(new DataBatch(new Data(Data.Type.Images, 1000), 0));
+        cpu.receiveData(new DataBatch(new Data("Images", 1000), 0));
         DataBatch db = cpu.processData();
         assertEquals(db.getData().getProcessed(), db.getData().getSize());
     }

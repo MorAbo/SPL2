@@ -18,7 +18,9 @@ class GPUTest {
         gpu3090 = new GPU("RTX3090");
         gpu2080 = new GPU("RTX2080");
         gpu1080 = new GPU("GTX1080");
-        model = new Model();
+        model = new Model("model1",
+                new Data("Images", 3000),
+                new Student("studen 1", "CS", "PhD"));
     }
 
     @AfterEach
@@ -29,7 +31,7 @@ class GPUTest {
     void divideData() {
         gpu3090.setModel(model);
         gpu3090.divideData();
-        assertEquals(gpu3090.DiskCapacity(), Math.ceil(model.GetData().getSize() / 1000));
+        assertEquals(gpu3090.DiskCapacity(), Math.ceil((float)(model.GetData().getSize()) / 1000));
     }
 
     @Test
@@ -37,13 +39,13 @@ class GPUTest {
         gpu3090.setModel(model);
         gpu3090.divideData();
         gpu3090.SendData();
-        assertTrue(gpu3090.DiskCapacity()==0);
+        assertEquals(gpu3090.DiskCapacity(), 0);
     }
 
     @Test
     void reciveProcesedData() {
         int oldvramcapacity = gpu3090.VramCapacityLeft();
-        gpu3090.receiveProcessedData(new DataBatch(new Data(Data.Type.Images,1000), 0));
+        gpu3090.receiveProcessedData(new DataBatch(new Data("Images",1000), 0));
         assertEquals(gpu3090.VramCapacityLeft(), oldvramcapacity+1);
     }
 
