@@ -8,4 +8,6 @@ public class ConfrenceInformation {
 
     private String name;
     private int date;
+    private int tick;
+
 }

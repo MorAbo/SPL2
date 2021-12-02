@@ -14,5 +14,11 @@ public class DataBatch {
         this.data = data;
         this.start_index = start_index;
     }
-    
+
+    public void ProcessData(){
+        int amount = Math.min(1000, data.getSize()-start_index);
+        data.ProcessData(amount);
+    }
+
+    public Data getData() { return data; }
 }

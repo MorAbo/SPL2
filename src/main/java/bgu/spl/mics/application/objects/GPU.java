@@ -17,31 +17,60 @@ public class GPU {
     enum Type {RTX3090, RTX2080, GTX1080}
 
     private Type type;
-
-    public Model model;
-
+    private Model model;
     private Cluster cluster;
-
-    public LinkedList<DataBatch> Disk;
-
+    private LinkedList<DataBatch> Disk;
     private LinkedList<DataBatch> VRAM;
+    private int tick;
 
-    public GPU(Type type){
-        this.type = type;
+
+    public GPU(String type){
+        this.type = setType(type);
         cluster = Cluster.getInstance();
         Disk = new LinkedList<>();
         VRAM = new LinkedList<>();
         model = null;
+        tick=0;
     }
 
-    /**
-     *
-     * @param model = model to operate on.
-     * @post model == model
-     */
+    private Type setType(String type){
+        Type t = null;
+        switch (type) {
+            case "RTX3090":
+                t = Type.RTX3090;
+                break;
+            case "RTX2080":
+                t = Type.RTX2080;
+                break;
+            case "GTX1080":
+                t = Type.GTX1080;
+                break;
+        }
+        return t;
+    }
+
+
     public void setModel(Model model){
         this.model = model;
     }
+    public int DiskCapacity() {return Disk.size();}
+
+    /**
+     * @return how many more batches i can add to the vram
+     */
+    public int VramCapacityLeft() {
+        if (this.type==Type.RTX3090) return 32-VRAM.size();
+        else if (this.type==Type.RTX3090) return 16-VRAM.size();
+        else return 8-VRAM.size();
+    }
+
+    /**
+     *increse the tick by 1
+     * @pre(tick)==@post(tick)-1
+     */
+    public void IncreaseTick(){tick++;}
+
+
 
     /**
     divided the data in model to batches of 1000 and
@@ -70,15 +99,37 @@ public class GPU {
     /**
      * after the cluster completed the task it will set the future of TrainModelEvent
      * as complete.
-     * @pre model.data.processed == 0
-     * @post model.data.processed == model.data.size
-     * @post
+     * @pre(VRAM.size())+1=@post(vram.size())
      */
-    public void receiveProcessedData(Data d){
-        //wait(time by the type)
-        //data.proccess = size
-        //model.data=data
+    public void receiveProcessedData(DataBatch data){
+        //addes it to the vram and sends it to train
+    }
+
+    /**
+     * train the processed data batch by batch
+     * @return the trained model
+     * @post(Model.data.prosseded)=model.data.size
+     */
+    public Model Train(){
+//        int sum=0;
+//        while(sum!=Math.ceil(model.GetData().getSize() / 1000)) {
+//            while (VRAM.isEmpty()) wait;
+//            DataBatch db = VRAM.pop();
+//            TrainBatch(db);
+//            sum++;
+//        }
+        //model.train(data.size)
+        return model;
+    }
+
+    /**
+     * trains a databatch
+     * (train=wait the appropriate amount of ticks)
+     * @param db the databatch to train
+     */
+    private void TrainBatch(DataBatch db){
 
     }
+
 
 }

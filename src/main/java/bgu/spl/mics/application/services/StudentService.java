@@ -2,10 +2,13 @@ package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.PublishResultEvent;
+import bgu.spl.mics.application.messages.TestModelEvent;
+import bgu.spl.mics.application.messages.TrainModelEvent;
 
 /**
  * Student is responsible for sending the {@link TrainModelEvent},
- * {@link TestModelEvent} and {@link PublishResultsEvent}.
+ * {@link TestModelEvent} and {@link PublishResultEvent}.
  * In addition, it must sign up for the conference publication broadcasts.
  * This class may not hold references for objects which it is not responsible for.
  *

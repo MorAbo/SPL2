@@ -10,7 +10,7 @@ be processed by one of the GPU microservices. During its process, it will utiliz
 the CPUS and the relevant GPU.
  */
 public class TrainModelEvent implements Event<Model> {
-    public Future<Model> f;
+    private Future<Model> f;
 
     public TrainModelEvent(){
         f=new Future<>();

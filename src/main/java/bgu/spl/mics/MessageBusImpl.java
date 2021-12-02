@@ -104,4 +104,8 @@ public class MessageBusImpl implements MessageBus {
 		//checks the ms is only once in the list
 
 	}
+
+	public void Clear(){
+		microservices.forEach((ms,q)-> unregister(ms));
+	}
 }

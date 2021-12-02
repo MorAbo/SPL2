@@ -2,6 +2,9 @@ package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.DataPreProcessEvent;
+import bgu.spl.mics.application.messages.TestModelEvent;
+import bgu.spl.mics.application.messages.TrainModelEvent;
 import bgu.spl.mics.application.objects.GPU;
 
 /**
@@ -27,6 +30,9 @@ public class GPUService extends MicroService {
     @Override
     protected void initialize() {
         // TODO Implement this
+
+        //case : tick bc
+        // gpu.incresetick()
 
 
     }

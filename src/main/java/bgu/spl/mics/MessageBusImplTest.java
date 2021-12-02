@@ -30,8 +30,7 @@ class MessageBusImplTest {
 
     @AfterEach
     void tearDown() {
-        //for each ms in microservices
-        //     ms.unregister
+        mb.Clear();
     }
 
     @Test
@@ -86,10 +85,10 @@ class MessageBusImplTest {
         Event<String> e = new ExampleEvent("test1");
         Future<String> f= mb.sendEvent(e);
         mb.complete(e, "result1");
-        assertEquals(f.result, "result1");
+        assertEquals(f.get(), "result1");
         //test 2: twice complete on the same event result in an error
         mb.complete(e,"result2");
-        assertEquals(f.result, "result1");
+        assertEquals(f.get(), "result1");
     }
 
     @Test
@@ -100,15 +99,26 @@ class MessageBusImplTest {
         mb.subscribeBroadcast(TickBroadcast.class, m1);
         Broadcast b = new TickBroadcast();
         mb.sendBroadcast(b);
-        assertEquals();     //checking b is in m1 queue
+        try{ Message msg = mb.awaitMessage(m1);
+            assertEquals(msg, b);}
+        catch (Exception ex){}
         //test 2: each ms not registered to the broadcast its not in their queue
         MicroService m2 = new StudentService("S2");
+        mb.subscribeBroadcast(PublishConferenceBroadcast.class, m2);
+        Broadcast b_ = new PublishConferenceBroadcast();
         mb.sendBroadcast(b);
-        assertEquals();     //checking b is in m1 queue and not in m2 queue
-        //test 3: if broadcast not in Broadcast dictionary, do nothing
+        mb.sendBroadcast(b_);
+        try{ Message msg = mb.awaitMessage(m2);
+            assertEquals(msg, b_);}
+        catch (Exception ex){}
+        //test 3: if no one is subscribed to broadcast, do nothing
+        mb.unregister(m2);
         Broadcast b1 = new PublishConferenceBroadcast();
         mb.sendBroadcast(b1);
-        assertEquals();     //checking b1 is not in m2 or m1 queue
+        mb.sendBroadcast(b);
+        try{ Message msg = mb.awaitMessage(m1);
+            assertEquals(msg, b);}
+        catch (Exception ex){}
     }
 
     @Test
@@ -124,16 +134,20 @@ class MessageBusImplTest {
         mb.subscribeEvent(TrainModelEvent.class, m2);
         Event e = new TrainModelEvent();
         mb.sendEvent(e);
-        assertEquals();     //checking e is in m1 queue
+        try{ Message msg = mb.awaitMessage(m1);
+            assertEquals(msg, e);}
+        catch (Exception ex){}
         Event e1 = new TrainModelEvent();
         mb.sendEvent(e1);
-        assertEquals();     //checking e is in m2 queue
+        try{ Message msg = mb.awaitMessage(m2);
+            assertEquals(msg, e1);}
+        catch (Exception ex){}
         Event e2 = new TrainModelEvent();
         mb.sendEvent(e2);
-        assertEquals();     //checking e is in m1 queue
-        //test 2: no other ms got the message
-        assertEquals();     //checking m3 queue is empty
-        //test 3: if no ms sends null
+        try{ Message msg = mb.awaitMessage(m1);
+            assertEquals(msg, e2);}
+        catch (Exception ex){}
+        //test 2: if no ms is subscribed to the event sends null
         Event e3 = new TrainModelEvent();
         assertEquals(mb.sendEvent(e3), null);
     }
@@ -143,10 +157,10 @@ class MessageBusImplTest {
         //test 1: register and see its in microservices
         MicroService m1 = new StudentService("S1");
         mb.register(m1);
-        assertEquals();     //m1 is in microservices
+        assertTrue(mb.IsRegistered(m1));
         //test 2: if already registered - dont do anything
         mb.register(m1);
-        assertEquals();     //m1 is in microservices only once
+        assertTrue(mb.IsRegistered(m1));
 
     }
 
@@ -155,7 +169,7 @@ class MessageBusImplTest {
         //test 1: if already unregistered - do nothing
         MicroService m1 = new StudentService("S1");
         mb.unregister(m1);
-        assertEquals();     //m1 is not in microservices, broadcasts, or events
+        assertFalse(mb.IsRegistered(m1));
         //test 2: unregister and see its not in microservices or in any list in messages
         mb.register(m1);
         mb.subscribeEvent(TrainModelEvent.class, m1);
@@ -164,18 +178,37 @@ class MessageBusImplTest {
         mb.sendBroadcast(b);
         MicroService m2 = new StudentService("S2");
         mb.subscribeEvent(TrainModelEvent.class, m2);
-        assertEquals();     //m1 is not in microservices, broadcasts, or events
-        //test 3: if a list in messages is empty delete the key
-        assertEquals();     //tickBroadcast key is not in the dic, Train key is in dic
+        assertFalse(mb.IsSubscribedBroadcast(TickBroadcast.class, m1));
+        assertFalse(mb.IsSubscribedEvent(TrainModelEvent.class, m1));
+        assertFalse(mb.IsRegistered(m1));
     }
 
     @Test
     void awaitMessage() {
-        //test 1: if unregistered do nothing
-
-        //test 2: if there is no messages do nothing
-
+        //test 1: if unregistered throw IllegalStateException
+        MicroService m1 = new StudentService("S1");
+        try{ mb.awaitMessage(m1); fail();}
+        catch (IllegalStateException e1){}
+        catch (InterruptedException e2) {fail();}
+        //test 2: if there is no messages wait until interupted or untill new msg arrives
+        //test 2.a: interrupted
+        mb.register(m1);
+        mb.subscribeBroadcast(TickBroadcast.class, m1);
+        Broadcast msg = new TickBroadcast();
+        Thread a = new Thread(()-> {try{ mb.awaitMessage(m1); fail();}
+                                    catch (IllegalStateException e1){fail();}
+                                    catch (InterruptedException e2) {assertTrue(true);}});
+        a.start();
+        a.interrupt();
+        //test 2.a: new message
+        Thread b = new Thread(()-> {try{ assertEquals(mb.awaitMessage(m1), msg);}
+                                    catch (Exception e){fail();} });
+        b.start();
+        try {wait(100);} catch (Exception ex){}
+        mb.sendBroadcast(msg);
         //test 3: if there is messages delete the top one and process it
-
+        mb.sendBroadcast(msg);
+        try{ assertEquals(mb.awaitMessage(m1), msg);}
+            catch (Exception e){fail();}
     }
 }

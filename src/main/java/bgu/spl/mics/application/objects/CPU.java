@@ -11,9 +11,10 @@ import java.util.Queue;
  */
 public class CPU {
 
-    public int cores;
-    public Queue<DataBatch> data;
-    public Cluster cluster;
+    private int cores;
+    private Queue<DataBatch> data;
+    private Cluster cluster;
+    private int tick;
 
     public CPU(int cores){
         this.cores = cores;
@@ -22,9 +23,16 @@ public class CPU {
     }
 
     /**
+     *increse the tick by 1
+     * @pre(tick)==@post(tick)-1
+     */
+    public void IncreaseTick(){tick++;}
+
+    public int dataInLine(){return data.size();}
+    /**
      * adds the dataBatch to the list of data/
-     * @param dataBatch
-     *
+     * @param dataBatch to add to the list data
+     *@post(data.size)=@pre(data.size)+1
      */
     public void receiveData(DataBatch dataBatch){
 
@@ -32,13 +40,22 @@ public class CPU {
 
     /**
      * process one of the batches.
-     * @return
+     * @return DataBatch after processing it
      */
     public DataBatch processData(){
-        //d = databatch.pop()
-        //d.data.processed += 1000
-        //return d
+//        DataBatch d= data.remove();
+//        int currentTick = tick;
+//        while (tick!=currentTick+tick2wait(d.getData())) wait();
+//        d.ProcessData();
+//        return d;
         return null;
+    }
+
+    private int tick2wait(Data d){
+        if(d.getType()== Data.Type.Images) return (32/cores)*4;
+        if(d.getType()== Data.Type.Text) return (32/cores)*2;
+        else return (32/cores);
+
     }
 
 

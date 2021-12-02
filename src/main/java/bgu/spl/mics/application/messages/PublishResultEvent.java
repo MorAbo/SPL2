@@ -1,11 +1,11 @@
 package bgu.spl.mics.application.messages;
 
 import bgu.spl.mics.Event;
+import bgu.spl.mics.Future;
 
 public class PublishResultEvent implements Event<String> {
-    public String result;
-
+    private Future<String> f;
     public PublishResultEvent(){
-        result = null;
+        f = null;
     }
 }

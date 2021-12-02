@@ -17,5 +17,7 @@ public class Student {
     private Degree status;
     private int publications;
     private int papersRead;
+    private int tick;
+
 
 }

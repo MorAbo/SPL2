@@ -8,10 +8,12 @@ package bgu.spl.mics.application.objects;
 public class Model {
 
     private String name;
-    public Data data;
+    private Data data;
     private Student student;
     enum status {PreTrained, Training, Trained, Tested};
     enum result {None, Good, Bad};
 
+    public void ProcessData(int amount){ data.ProcessData(amount);}
+    public Data GetData(){ return data;}
 
 }
