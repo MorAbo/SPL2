@@ -85,11 +85,23 @@ public class MessageBusImpl implements MessageBus {
 		return null;
 	}
 
-	private boolean isSubscribedEvent(){
-		// TODO Auto-generated method stub
-		return true;
+	@Override
+	public boolean IsRegistered(MicroService m) {
+		return false;
+		//checks the ms is only once in the list
+
 	}
 
-	
+	@Override
+	public <T> boolean IsSubscribedEvent(Class<? extends Event<T>> type, MicroService m) {
+		return false;
+		//checks the ms is only once in the list
+	}
 
+	@Override
+	public boolean IsSubscribedBroadcast(Class<? extends Broadcast> type, MicroService m) {
+		return false;
+		//checks the ms is only once in the list
+
+	}
 }

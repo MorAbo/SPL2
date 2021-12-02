@@ -48,7 +48,7 @@ public interface MessageBus {
      *
      * @pre future in event is null
      * @post future in event isnt null
-     * @post if @pre(future in event) isnt null throw error
+     * @post if @pre(future in event) isnt null, do nothing
      */
     <T> void complete(Event<T> e, T result);
 
@@ -121,9 +121,25 @@ public interface MessageBus {
 
     /**
      * using this method you can query whether a microservice is registered to the message bus
-     * @param m The micro-service on questione whether its registered
+     * @param m The micro-service on question whether its registered
      * @return true if m is registered to the messagebus and false otherwise
      */
     boolean IsRegistered(MicroService m);
+
+    /**
+     * using this method you can query whether a microservice is subscribed to a certain event
+     * @param m The micro-service on question whether its subscribed to type
+     * @param type the event in question
+     * @return true if m is subscribed to the type and false otherwise
+     */
+    <T> boolean IsSubscribedEvent(Class<? extends Event<T>> type, MicroService m);
+
+    /**
+     * using this method you can query whether a microservice is subscribed to a certain broadcast
+     * @param m The micro-service on question whether its subscribed to type
+     * @param type the broadcast in question
+     * @return true if m is subscribed to the type and false otherwise
+     */
+     boolean IsSubscribedBroadcast(Class<? extends Broadcast> type, MicroService m);
     
 }

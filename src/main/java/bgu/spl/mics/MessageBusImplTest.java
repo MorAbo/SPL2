@@ -6,11 +6,17 @@ import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
 import bgu.spl.mics.application.messages.TestModelEvent;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.messages.TrainModelEvent;
+import bgu.spl.mics.application.objects.Data;
+import bgu.spl.mics.application.objects.GPU;
+import bgu.spl.mics.application.objects.Model;
 import bgu.spl.mics.application.services.StudentService;
+import bgu.spl.mics.example.messages.ExampleEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import java.awt.*;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 
 class MessageBusImplTest {
@@ -29,74 +35,61 @@ class MessageBusImplTest {
     }
 
     @Test
-
     void subscribeEvent() {
         //test 1: cannot subscribe an un registered microservice
         MicroService ms = new StudentService("Student 1");
-        try {
-            mb.subscribeEvent(TrainModelEvent.class, ms);
-            fail("Exception expected!");
-        }
-        catch (Exception e){
-            assertTrue(true);
-        }
+        mb.subscribeEvent(TrainModelEvent.class, ms);
+        assertFalse(mb.IsSubscribedEvent(TrainModelEvent.class, ms));
         //test 2: subscribing successfully
         mb.register(ms);
         mb.subscribeEvent(TrainModelEvent.class, ms);
-        assertTrue();   //checking ms is in the traingmodelevent list
+        assertTrue(mb.IsSubscribedEvent(TrainModelEvent.class, ms));
         //test3: resubscribing
         mb.subscribeEvent(TrainModelEvent.class, ms);
-        assertEquals();     //checking ms is in the traingmodelevent list only once
+        assertTrue(mb.IsSubscribedEvent(TrainModelEvent.class, ms));
         //test 4: subscribing to a different event
         mb.subscribeEvent(TestModelEvent.class, ms);
-        assertEquals();  //checking ms is in the TestModelEvent list and in traingmodelevent list
+        assertTrue(mb.IsSubscribedEvent(TrainModelEvent.class, ms));
+        assertTrue(mb.IsSubscribedEvent(TestModelEvent.class, ms));
         //test 5: subsribing to an already existing event
         MicroService ms2 = new StudentService("Student 2");
         mb.subscribeEvent(TrainModelEvent.class, ms2);
-        assertEquals();     //checking ms and ms2 is in the traingmodelevent list
+        assertTrue(mb.IsSubscribedEvent(TrainModelEvent.class, ms2));
     }
 
     @Test
     void subscribeBroadcast() {
         //test 1: cannot subscribe an un registered microservice
         MicroService ms = new StudentService("Student 1");
-        try {
-            mb.subscribeBroadcast(TickBroadcast.class, ms);
-            fail("Exception expected!");
-        }
-        catch (Exception e){
-            assertTrue(true);
-        }
+        mb.subscribeBroadcast(TickBroadcast.class, ms);
+        assertFalse(mb.IsSubscribedBroadcast(TickBroadcast.class, ms));
         //test 2: subscribing successfully
         mb.register(ms);
         mb.subscribeBroadcast(TickBroadcast.class, ms);
-        assertEquals();     //checking ms is in the TickBroadcast list
+        assertTrue(mb.IsSubscribedBroadcast(TickBroadcast.class, ms));
         //test3: resubscribing
         mb.subscribeBroadcast(TickBroadcast.class, ms);
-        assertEquals();     //checking ms is in the TickBroadcast list only once
+        assertTrue(mb.IsSubscribedBroadcast(TickBroadcast.class, ms));
         //test 4: subscribing to a different event
         mb.subscribeBroadcast(PublishConferenceBroadcast.class, ms);
-        assertEquals();     //checking ms is in the TickBroadcast list and in PublishConferenceBroadcast list
-        //test 5: subsribing to an already existing event
+        assertTrue(mb.IsSubscribedBroadcast(TickBroadcast.class, ms));
+        assertTrue(mb.IsSubscribedBroadcast(PublishConferenceBroadcast.class, ms));
+        //test 5: subscribing to an already existing event
         MicroService ms2 = new StudentService("Student 2");
-        mb.subscribeBroadcast(TickBroadcast.class, ms);
-        assertEquals();     //checking ms and ms2 is in the TickBroadcast list only once
+        mb.subscribeBroadcast(TickBroadcast.class, ms2);
+        assertTrue(mb.IsSubscribedBroadcast(TickBroadcast.class, ms2));
     }
 
     @Test
     void complete() {
         //test 1: the future object in the event is with result T
-        TrainModelEvent e = new TrainModelEvent();
-        mb.complete(e,7);
-        assertEquals(e.f.result,7);
+        Event<String> e = new ExampleEvent("test1");
+        Future<String> f= mb.sendEvent(e);
+        mb.complete(e, "result1");
+        assertEquals(f.result, "result1");
         //test 2: twice complete on the same event result in an error
-        try {
-            mb.complete(e,7);
-            fail("Exception expected!");
-        }
-        catch (Exception ex){
-            assertTrue(true);
-        }
+        mb.complete(e,"result2");
+        assertEquals(f.result, "result1");
     }
 
     @Test
