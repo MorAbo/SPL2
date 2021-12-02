@@ -49,7 +49,11 @@ public class GPU {
         return t;
     }
 
-
+    /**
+     *
+     * @param model = model to operate on.
+     * @post model == model
+     */
     public void setModel(Model model){
         this.model = model;
     }

@@ -11,13 +11,11 @@ import bgu.spl.mics.application.objects.GPU;
 import bgu.spl.mics.application.objects.Model;
 import bgu.spl.mics.application.services.StudentService;
 import bgu.spl.mics.example.messages.ExampleEvent;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.awt.*;
-import java.lang.reflect.Type;
-import java.util.HashMap;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MessageBusImplTest {
 

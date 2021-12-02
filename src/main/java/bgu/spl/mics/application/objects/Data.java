@@ -16,10 +16,10 @@ public class Data {
     private int processed;
     private int size;
 
-    public Data(Type type, int size){
-        this.type = type;
+    public Data(String type, int size){
         this.size = size;
         processed = 0;
+        setType(type);
     }
 
     public Type getType(){ return type;}
@@ -27,4 +27,19 @@ public class Data {
     public int getSize(){return size;}
 
     public void ProcessData(int amount){ processed+=amount; }
+
+    private void setType(String resultString){
+        switch (resultString) {
+            case "Images":
+                type = Type.Images;
+                break;
+            case "Text":
+                type = Type.Text;
+                break;
+            case "Tabular":
+                type = Type.Tabular;
+                break;
+        }
+    }
+
 }
