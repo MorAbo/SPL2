@@ -23,16 +23,16 @@ public class CPU {
     }
 
     /**
-     *increse the tick by 1
-     * @pre(tick)==@post(tick)-1
+     *increase the tick by 1
+     * @pre (tick)==@post(tick)-1
      */
     public void IncreaseTick(){tick++;}
 
     public int dataInLine(){return data.size();}
     /**
-     * adds the dataBatch to the list of data/
+     * adds the dataBatch to the list of data.
      * @param dataBatch to add to the list data
-     *@post(data.size)=@pre(data.size)+1
+     *@post (data.size)=@pre(data.size)+1
      */
     public void receiveData(DataBatch dataBatch){
 
@@ -41,6 +41,8 @@ public class CPU {
     /**
      * process one of the batches.
      * @return DataBatch after processing it
+     * @post data.size() = pre(data.size() - 1)
+     * @post dataBatch.isProcessed()
      */
     public DataBatch processData(){
 //        DataBatch d= data.remove();

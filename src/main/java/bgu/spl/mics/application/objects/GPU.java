@@ -1,7 +1,5 @@
 package bgu.spl.mics.application.objects;
 
-import bgu.spl.mics.application.services.GPUService;
-import com.sun.tools.javac.util.List;
 
 import java.util.LinkedList;
 
@@ -69,8 +67,8 @@ public class GPU {
     }
 
     /**
-     *increse the tick by 1
-     * @pre(tick)==@post(tick)-1
+     *increase the tick by 1
+     * @pre (tick)==@post(tick)-1
      */
     public void IncreaseTick(){tick++;}
 
@@ -81,7 +79,6 @@ public class GPU {
     stores it in the disk
      * @pre DISK.isEmpty();
      * @post DISK.size() == Math.ceil(model.data.size() / 1000)
-     * @post DISK[i] == databatch(model.data, i * 1000)
      */
     public void divideData(){
 
@@ -103,7 +100,7 @@ public class GPU {
     /**
      * after the cluster completed the task it will set the future of TrainModelEvent
      * as complete.
-     * @pre(VRAM.size())+1=@post(vram.size())
+     * @pre (VRAM.size())+1 = @post(vram.size())
      */
     public void receiveProcessedData(DataBatch data){
         //addes it to the vram and sends it to train
@@ -112,7 +109,7 @@ public class GPU {
     /**
      * train the processed data batch by batch
      * @return the trained model
-     * @post(Model.data.prosseded)=model.data.size
+     * @post (Model.data.processed) = model.data.size
      */
     public Model Train(){
 //        int sum=0;

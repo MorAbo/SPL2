@@ -1,5 +1,6 @@
-package bgu.spl.mics.application.objects;
-
+import bgu.spl.mics.application.objects.CPU;
+import bgu.spl.mics.application.objects.Data;
+import bgu.spl.mics.application.objects.DataBatch;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ class CPUTest {
     void processData() {
         cpu.receiveData(new DataBatch(new Data("Images", 1000), 0));
         DataBatch db = cpu.processData();
-        assertEquals(db.getData().getProcessed(), db.getData().getSize());
+        assertTrue(db.isProcessed());
     }
 
 }

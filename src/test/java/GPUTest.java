@@ -1,5 +1,4 @@
-package bgu.spl.mics.application.objects;
-
+import bgu.spl.mics.application.objects.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,7 +42,7 @@ class GPUTest {
     }
 
     @Test
-    void reciveProcesedData() {
+    void reciveProcessedData() {
         int oldvramcapacity = gpu3090.VramCapacityLeft();
         gpu3090.receiveProcessedData(new DataBatch(new Data("Images",1000), 0));
         assertEquals(gpu3090.VramCapacityLeft(), oldvramcapacity+1);

@@ -18,9 +18,8 @@ public interface MessageBus {
      * @param type The type to subscribe to,
      * @param m    The subscribing micro-service.
      *
-     * @pre m is in microservices
-     * @post m is in list of type in dictionary events
-     * @post if there is no type key in dictionary create one and add m to the list
+     * @pre isRegistered(m)
+     * @post isSubscribed(type, m)
      */
     <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m);
 
@@ -30,9 +29,8 @@ public interface MessageBus {
      * @param type 	The type to subscribe to.
      * @param m    	The subscribing micro-service.
      *
-     * @pre m is in microservices
-     * @post m is in list of type in dictionary broadcasts
-     * @post if there is no type key in dictionary create one and add m to the list
+     * @pre isRegistered(m)
+     * @post isSubscribed(type, m)
      */
     void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m);
 
@@ -47,7 +45,7 @@ public interface MessageBus {
      * @param result The resolved result of the completed event.
      *
      * @pre future in event is null
-     * @post future in event isnt null
+     * @post future in event isn't null
      * @post if @pre(future in event) isn't null, do nothing
      */
     <T> void complete(Event<T> e, T result);
@@ -72,8 +70,8 @@ public interface MessageBus {
      * @return {@link Future<T>} object to be resolved once the processing is complete,
      * 	       null in case no micro-service has subscribed to {@code e.getClass()}.
      *
-     * @post e in in the queue on one on the microservices which is subscibed to this type of
-     *          event and its his turn recieves a message
+     * @post e in the queue on one on the microservices which is subscribed to this type of
+     *          event and it's his turn receives a message
      * @post if no microservices is subscribed to e.class then return null
      */
     <T> Future<T> sendEvent(Event<T> e);
@@ -143,7 +141,7 @@ public interface MessageBus {
      boolean IsSubscribedBroadcast(Class<? extends Broadcast> type, MicroService m);
 
     /**
-     * clears the object to its oreginal (when created) state
+     * clears the object to its original (when created) state
      */
     void Clear();
 

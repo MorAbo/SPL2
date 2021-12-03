@@ -17,7 +17,7 @@ public class MessageBusImpl implements MessageBus {
 	private HashMap<Class<? extends Broadcast>, List<MicroService>> broadcasts;
 	private final static MessageBusImpl INSTANCE = new MessageBusImpl();
 
-	private  MessageBusImpl(){
+	private MessageBusImpl(){
 		microservices = new HashMap<>();
 		events= new HashMap<>();
 		broadcasts=new HashMap<>();
