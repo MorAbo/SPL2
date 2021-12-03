@@ -1,5 +1,7 @@
 package bgu.spl.mics;
 
+import com.sun.tools.javac.util.Pair;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,7 +15,7 @@ import java.util.Queue;
 public class MessageBusImpl implements MessageBus {
 
 	private HashMap<MicroService, Queue<Message>> microservices;
-	private HashMap<Class<? extends Event<?>>, List<MicroService>> events;
+	private HashMap<Class<? extends Event<?>>, Pair<List<MicroService>, Integer>> events;
 	private HashMap<Class<? extends Broadcast>, List<MicroService>> broadcasts;
 	private final static MessageBusImpl INSTANCE = new MessageBusImpl();
 
