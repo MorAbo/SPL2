@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.ReadWriteLock;
 
 /**
  * The {@link MessageBusImpl class is the implementation of the MessageBus interface.
@@ -14,30 +17,34 @@ import java.util.Queue;
  */
 public class MessageBusImpl implements MessageBus {
 
-	private HashMap<MicroService, Queue<Message>> microservices;
-	private HashMap<Class<? extends Event<?>>, Pair<List<MicroService>, Integer>> events;
-	private HashMap<Class<? extends Broadcast>, List<MicroService>> broadcasts;
-	private final static MessageBusImpl INSTANCE = new MessageBusImpl();
+	private ReadWriteMap<MicroService, ConcurrentLinkedQueue<Message>> microservices;
+	private ReadWriteMap<Class<? extends Event<?>>, ConcurrentHashMap<List<MicroService>, Integer>> events;
+	private ReadWriteMap<Class<? extends Broadcast>, ReadWriteList<MicroService>> broadcasts;
+
+	private static class InstanceHolder{
+		private static MessageBusImpl INSTANCE =new MessageBusImpl();
+	}
 
 	private MessageBusImpl(){
-		microservices = new HashMap<>();
-		events= new HashMap<>();
-		broadcasts=new HashMap<>();
+		microservices = new ReadWriteMap<>(new HashMap<>());
+		events= new ReadWriteMap<>(new HashMap<>());
+		broadcasts=new ReadWriteMap<>(new HashMap<>());
 	}
 
 	public static MessageBusImpl GetInstance(){
-		return INSTANCE ;
+		return InstanceHolder.INSTANCE;
 	}
 
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
-		// TODO Auto-generated method stub
-		//get microservices
-		//m in microservices
-
-		//syncronized on microservices and events
-
-
+		if (events.containsKey(type)) {
+			if (!events.get(type).keySet().iterator().next().contains(m))
+				events.get(type).keySet().iterator().next().add(m);
+		}
+		else {
+			events.put(type, new ConcurrentHashMap<>());
+			events.get(type).put(new LinkedList<MicroService>(){{add(m);}},0);
+		}
 	}
 
 	@Override
