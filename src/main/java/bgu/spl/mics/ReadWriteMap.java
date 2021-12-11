@@ -93,4 +93,13 @@ public class ReadWriteMap <K,V> {
             r.unlock();
         }
     }
+
+    public Set<Map.Entry<K,V>> getSet(){
+        r.lock();
+        try {
+            return map.entrySet();
+        } finally {
+            r.unlock();
+        }
+    }
 }

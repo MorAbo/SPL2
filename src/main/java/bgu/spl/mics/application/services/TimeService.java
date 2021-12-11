@@ -1,5 +1,6 @@
 package bgu.spl.mics.application.services;
 
+import bgu.spl.mics.Message;
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.TickBroadcast;
@@ -27,7 +28,17 @@ public class TimeService extends MicroService{
 
 	@Override
 	protected void initialize() {
-		// TODO Implement this
+		while (Thread.currentThread().isInterrupted()){
+			try{
+				Message m= MessageBusImpl.GetInstance().awaitMessage(this);
+				m.dosomthing;
+			}
+			catch (InterruptedException e)
+			{
+				Thread.currentThread().interrupt();
+			}
+		}
+		//shutdown or whatever you do in the end of the time
 		
 	}
 

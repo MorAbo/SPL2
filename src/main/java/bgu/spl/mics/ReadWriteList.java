@@ -23,6 +23,42 @@ public class ReadWriteList<E> {
         }
     }
 
+    public boolean remove(E element) {
+        Lock writeLock = rwLock.writeLock();
+        writeLock.lock();
+
+        try {
+            return list.remove(element);
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    public int whereIs(E e) {
+        Lock readLock = rwLock.readLock();
+        readLock.lock();
+
+        try {
+            if (list.contains(e)){
+                for (int i=0; i< list.size(); i++)
+                    if( list.get(i).equals(e) ) return i;}
+            return -1;
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    public boolean contains(E e) {
+        Lock readLock = rwLock.readLock();
+        readLock.lock();
+
+        try {
+            return list.contains(e);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
     public E get(int index) {
         Lock readLock = rwLock.readLock();
         readLock.lock();

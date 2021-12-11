@@ -2,12 +2,10 @@ package bgu.spl.mics;
 
 import com.sun.tools.javac.util.Pair;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReadWriteLock;
 
 /**
@@ -18,7 +16,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 public class MessageBusImpl implements MessageBus {
 
 	private ReadWriteMap<MicroService, ConcurrentLinkedQueue<Message>> microservices;
-	private ReadWriteMap<Class<? extends Event<?>>, ConcurrentHashMap<List<MicroService>, Integer>> events;
+	private ReadWriteMap<Class<? extends Message>, ReadWriteList<MicroService>> events;
+	private ReadWriteMap<Class<? extends Message>, Integer> roundRobin;
 	private ReadWriteMap<Class<? extends Broadcast>, ReadWriteList<MicroService>> broadcasts;
 
 	private static class InstanceHolder{
@@ -28,6 +27,7 @@ public class MessageBusImpl implements MessageBus {
 	private MessageBusImpl(){
 		microservices = new ReadWriteMap<>(new HashMap<>());
 		events= new ReadWriteMap<>(new HashMap<>());
+		roundRobin=new ReadWriteMap<>(new HashMap<>());
 		broadcasts=new ReadWriteMap<>(new HashMap<>());
 	}
 
@@ -37,88 +37,102 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
-		if (events.containsKey(type)) {
-			if (!events.get(type).keySet().iterator().next().contains(m))
-				events.get(type).keySet().iterator().next().add(m);
-		}
-		else {
-			events.put(type, new ConcurrentHashMap<>());
-			events.get(type).put(new LinkedList<MicroService>(){{add(m);}},0);
-		}
+		if (!events.containsKey(type))
+			events.put(type, new ReadWriteList<>());
+		if (!IsSubscribedEvent(type, m))
+			events.get(type).add(m);
 	}
 
 	@Override
 	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-		// TODO Auto-generated method stub
-		//syncronized on microservices and broadcasts
-
+		if (!broadcasts.containsKey(type))
+			broadcasts.put(type, new ReadWriteList<>());
+		if (!IsSubscribedBroadcast(type, m))
+			broadcasts.get(type).add(m);
 	}
 
 	@Override
 	public <T> void complete(Event<T> e, T result) {
-		// TODO Auto-generated method stub
-		//e.future.setresuts(result)
-
+		e.Resolve(result);
 	}
 
 	@Override
 	public void sendBroadcast(Broadcast b) {
-		// TODO Auto-generated method stub
-		//syncronized on broadcasts microservices
+		synchronized(broadcasts.get(b.getClass())){
+			for (int i=0; i<broadcasts.get(b.getClass()).size(); i++)
+				microservices.get(broadcasts.get(b.getClass()).get(i)).add(b);
+			}
+		notifyAll();
 	}
 
 	
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
-		// TODO Auto-generated method stub
-		return null;
-
-		//syncronized on events microservices
+		synchronized (roundRobin.get(e.getClass())){
+			Integer i = roundRobin.get(e.getClass());
+			MicroService m= events.get(e.getClass()).get(i);
+			microservices.get(m).add(e);
+			i=(i+1)%events.get(e.getClass()).size();
+			roundRobin.put(e.getClass(),i);
+		}
+		notifyAll();
+		return new Future<>();
 	}
 
 	@Override
 	public void register(MicroService m) {
-		// TODO Auto-generated method stub
-		//synchronized on microservices
-		if (!microservices.containsKey(m)){
-			microservices.put(m, new LinkedList<>());
-		}
+		if (!IsRegistered(m))
+			microservices.put(m, new ConcurrentLinkedQueue<>());
 	}
 
 	@Override
 	public void unregister(MicroService m) {
-		// TODO Auto-generated method stub
-		//syncronized on microservices, broadcasts, events
-
+		microservices.remove(m);
+		//remove from broad cast
+		for (Map.Entry<Class<? extends Broadcast>, ReadWriteList<MicroService>> pair: broadcasts.getSet()){
+			pair.getValue().remove(m);
+		}
+		//remove from event
+		for (Map.Entry<Class<? extends Message>, ReadWriteList<MicroService>> pair: events.getSet()) {
+			int i = pair.getValue().whereIs(m);
+			if (i != -1) {
+				pair.getValue().remove(m);
+				//round robin where we remove if i>= location of m in events than i--
+				if (roundRobin.get(pair.getKey()) >= i) {
+					i = (i - 1) % pair.getValue().size();
+					roundRobin.put(pair.getKey(), i);
+				}
+			}
+		}
 	}
 
 	@Override
 	public Message awaitMessage(MicroService m) throws InterruptedException {
-		// TODO Auto-generated method stub
-		return null;
+		if (!IsRegistered(m)) throw new IllegalStateException("service not registered");
+		while (microservices.get(m).isEmpty())
+			m.wait();
+		return microservices.get(m).poll();
 	}
 
 	@Override
 	public boolean IsRegistered(MicroService m) {
-		return false;
-		//checks the ms is only once in the list
-
+		return microservices.containsKey(m);
 	}
 
 	@Override
 	public <T> boolean IsSubscribedEvent(Class<? extends Event<T>> type, MicroService m) {
-		return false;
-		//checks the ms is only once in the list
+		return events.get(type).contains(m);
 	}
 
 	@Override
 	public boolean IsSubscribedBroadcast(Class<? extends Broadcast> type, MicroService m) {
-		return false;
-		//checks the ms is only once in the list
-
+		return broadcasts.get(type).contains(m);
 	}
 
 	public void Clear(){
-		microservices.forEach((ms,q)-> unregister(ms));
+		microservices.clear();
+		broadcasts.clear();
+		events.clear();
+		roundRobin.clear();
 	}
 }

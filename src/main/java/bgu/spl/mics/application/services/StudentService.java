@@ -31,4 +31,11 @@ public class StudentService extends MicroService {
         // TODO Implement this
 
     }
+
+//    public void SendEvent(){
+//        e = new event();
+//        e.future.set( MessageBusImpl.GetInstance().sendEvent(e));
+//        //f!=null therefor i can manipulate it
+//    }
+
 }

@@ -1,5 +1,7 @@
 package bgu.spl.mics.application.objects;
 
+import bgu.spl.mics.application.messages.PublishResultEvent;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -46,4 +48,5 @@ public class Student {
             status = Degree.PhD;
         }
     }
+
 }
