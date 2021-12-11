@@ -24,9 +24,11 @@ public class Cluster {
 	private int gpuTimeUnitsUsed;
 
 
+
 	private static class ClusterHolder{
 		private final static Cluster INSTANCE = new Cluster();
 	}
+
 	private Cluster(){
 		gpuList = new LinkedList<>();
 		cpuList = new LinkedList<>();
@@ -44,6 +46,20 @@ public class Cluster {
 		return ClusterHolder.INSTANCE;
 	}
 
+	public void IncreaseCpuRunTime() {
+		cpuTimeUnitsUsed++;
+	}
+
+	public void IncreaseGpuRunTime() {
+		gpuTimeUnitsUsed++;
+	}
+	public void addTrainedModel(String name) {
+		modelsTrained.add(name);
+	}
+
+
+	public void addCPU(CPU cpu){cpuList.add(cpu);}
+	public void addGPU(GPU gpu){gpuList.add(gpu);}
 
 	//recieves unprossed data from cpu and start the sequence to process it
 	public void processdata(DataBatch db, GPU gpu) {
@@ -62,6 +78,9 @@ public class Cluster {
 
 	public void ReturnProcessedData(DataBatch db){
 		relevantGpu.get(db).receiveProcessedData(db);
+		relevantGpu.remove(db);
+		dataBatchesProcessedByCPUs++;
 	}
+
 
 }

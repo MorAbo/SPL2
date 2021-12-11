@@ -25,6 +25,7 @@ public class CPU {
         data = new LinkedList<>();
         tick=1;
         TimeLeft=0;
+        cluster.addCPU(this);
     }
 
     public int getFutureTimeLeft(DataBatch db){return TimeLeft+CalTime(db);}
@@ -61,8 +62,11 @@ public class CPU {
     public void processData() throws InterruptedException {
         DataBatch d= data.remove();
         int currentTick = tick;
-        while (tick!=currentTick+CalTime(d))
+        while (tick!=currentTick+CalTime(d)) {
             wait();
+            cluster.IncreaseCpuRunTime();
+        }
+
         d.ProcessData();
         cluster.ReturnProcessedData(d);
     }

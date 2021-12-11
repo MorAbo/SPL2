@@ -98,11 +98,13 @@ public class CRMSRunner {
 
     private static void parseConferences(JsonArray conferencesArray){
         MessageBusImpl messageBus = MessageBusImpl.GetInstance();
+        int oldDate=1;
         for (JsonElement conferenceElement : conferencesArray){
             JsonObject JSonConference = conferenceElement.getAsJsonObject();
             String name = JSonConference.get("name").getAsString();
             int date = JSonConference.get("date").getAsInt();
-            ConfrenceInformation confrenceInformation = new ConfrenceInformation(name, date);
+            ConfrenceInformation confrenceInformation = new ConfrenceInformation(name, date, oldDate);
+            oldDate=date;
             ConferenceService conferenceService = new ConferenceService("conference service", confrenceInformation);
             messageBus.register(conferenceService);
         }

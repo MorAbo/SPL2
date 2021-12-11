@@ -31,6 +31,11 @@ public class ConferenceService extends MicroService {
 
     @Override
     protected void initialize() {
+        if (confrenceInformation.shouldRegister())
+            subscribeEvent(PublishResultEvent.class, message_-> {
+                if (message_.isModelGood())
+                    confrenceInformation.addToModels(message_.getModel());
+            });
         subscribeBroadcast(TickBroadcast.class, message-> {
             confrenceInformation.IncreaseTick();
             if (confrenceInformation.shouldRegister())

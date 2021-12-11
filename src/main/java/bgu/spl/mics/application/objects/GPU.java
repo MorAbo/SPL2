@@ -29,6 +29,7 @@ public class GPU {
         VRAM = new LinkedList<>();
         model = null;
         tick=1;
+        cluster.addGPU(this);
     }
 
     private Type setType(String type){
@@ -115,11 +116,14 @@ public class GPU {
      */
     public Model Train(Model m) throws InterruptedException {
         setModel(m);
+        m.setStatus("Training");
         divideData();
         while (!Disk.isEmpty())
             SendData();
         while (!VRAM.isEmpty())
             TrainBatch(VRAM.remove());
+        cluster.addTrainedModel(model.getName());
+        m.setStatus("Trained");
         return model;
     }
 
@@ -140,8 +144,11 @@ public class GPU {
 
     private void waitByTick(int tickSum) throws InterruptedException {
         int CurrentTick=tick;
-        while(CurrentTick+tickSum!=tick)
+        while(CurrentTick+tickSum!=tick) {
             wait();
+            cluster.IncreaseGpuRunTime();
+        }
+
     }
-    
+
 }

@@ -48,6 +48,7 @@ public class GPUService extends MicroService {
                 else message.getModel().setResult("Good");
             }
             complete(message, message.getModel());
+            message.getModel().setStatus("Tested");
         });
         subscribeBroadcast(TickBroadcast.class, message-> gpu.IncreaseTick());
 
