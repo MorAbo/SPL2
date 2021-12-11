@@ -48,14 +48,16 @@ public class Cluster {
 	//recieves unprossed data from cpu and start the sequence to process it
 	public void processdata(DataBatch db, GPU gpu) {
 		relevantGpu.put(db, gpu);
-		CPU target = cpuList.get(0);
-		int minTime= target.getFutureTimeLeft(db);
-		for (CPU cpu: cpuList)
-			if (cpu.getFutureTimeLeft(db)<minTime){
-				minTime=cpu.getFutureTimeLeft(db);
-				target=cpu;
-			}
-		target.receiveData(db);
+		synchronized (cpuList) {
+			CPU target = cpuList.get(0);
+			int minTime = target.getFutureTimeLeft(db);
+			for (CPU cpu : cpuList)
+				if (cpu.getFutureTimeLeft(db) < minTime) {
+					minTime = cpu.getFutureTimeLeft(db);
+					target = cpu;
+				}
+			target.receiveData(db);
+		}
 	}
 
 	public void ReturnProcessedData(DataBatch db){

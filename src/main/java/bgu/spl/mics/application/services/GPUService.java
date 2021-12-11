@@ -1,5 +1,6 @@
 package bgu.spl.mics.application.services;
 
+import bgu.spl.mics.Event;
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.TestModelEvent;
@@ -7,6 +8,8 @@ import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.messages.TrainModelEvent;
 import bgu.spl.mics.application.objects.GPU;
 import bgu.spl.mics.application.objects.Model;
+
+import java.util.Queue;
 
 /**
  * GPU service is responsible for handling the
@@ -19,6 +22,7 @@ import bgu.spl.mics.application.objects.Model;
 public class GPUService extends MicroService {
 
     private GPU gpu;
+    Queue<Event> events;
 
     public GPUService(String name, GPU gpu) {
         super(name);
@@ -30,8 +34,8 @@ public class GPUService extends MicroService {
     @Override
     protected void initialize() {
         subscribeEvent(TrainModelEvent.class, message->{
-            Model m = gpu.Train(message.getModel());
-            complete(message,m);
+            try {Model m = gpu.Train(message.getModel());
+            complete(message,m);} catch (InterruptedException e){terminate();}
         });
         subscribeEvent(TestModelEvent.class, message-> {
             double d = Math.random();

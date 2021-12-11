@@ -70,7 +70,7 @@ public class GPU {
      *increase the tick by 1
      * @pre (tick)==@post(tick)-1
      */
-    public void IncreaseTick(){tick++;}
+    public void IncreaseTick(){tick++; notifyAll();}
 
 
 
@@ -81,7 +81,9 @@ public class GPU {
      * @post DISK.size() == Math.ceil(model.data.size() / 1000)
      */
     public void divideData(){
-
+        for (int i=0; i<model.GetData().getSize() / 1000; i+=1000){
+            Disk.add(new DataBatch(model.GetData(), i));
+        }
     }
 
     /**
@@ -103,9 +105,7 @@ public class GPU {
      * @pre (VRAM.size())+1 = @post(vram.size())
      */
     public void receiveProcessedData(DataBatch data){
-        //addes it to the vram and sends it to train
-
-        //Train
+        VRAM.add(data);
     }
 
     /**
@@ -113,23 +113,13 @@ public class GPU {
      * @return the trained model
      * @post (Model.data.processed) = model.data.size
      */
-    public Model Train(Model m){
+    public Model Train(Model m) throws InterruptedException {
         setModel(m);
         divideData();
         while (!Disk.isEmpty())
             SendData();
-
-        //insert into vram
-        //train each db in vram
-
-//        int sum=0;
-//        while(sum!=Math.ceil(model.GetData().getSize() / 1000)) {
-//            while (VRAM.isEmpty()) wait;
-//            DataBatch db = VRAM.pop();
-//            TrainBatch(db);
-//            sum++;
-//        }
-        //model.train(data.size)
+        while (!VRAM.isEmpty())
+            TrainBatch(VRAM.remove());
         return model;
     }
 
@@ -138,9 +128,20 @@ public class GPU {
      * (train=wait the appropriate amount of ticks)
      * @param db the databatch to train
      */
-    private void TrainBatch(DataBatch db){
+    private void TrainBatch(DataBatch db) throws InterruptedException {
+        if (type.equals(Type.RTX3090))
+            waitByTick(1);
+        if(type.equals(Type.RTX2080))
+            waitByTick(2);
+        else waitByTick(4);
+
 
     }
 
-
+    private void waitByTick(int tickSum) throws InterruptedException {
+        int CurrentTick=tick;
+        while(CurrentTick+tickSum!=tick)
+            wait();
+    }
+    
 }
