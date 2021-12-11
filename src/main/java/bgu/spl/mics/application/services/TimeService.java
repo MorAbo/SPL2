@@ -18,28 +18,28 @@ public class TimeService extends MicroService{
 
 	int tickTime;
 	int duration;
+	int currentTick;
 
 	public TimeService(int tickTime, int duration) {
 		super("Time Service");
 		// TODO Implement this
 		this.tickTime = tickTime;
 		this.duration = duration;
+		currentTick=1;
 	}
 
 	@Override
 	protected void initialize() {
-		while (Thread.currentThread().isInterrupted()){
-			try{
-				Message m= MessageBusImpl.GetInstance().awaitMessage(this);
-				m.dosomthing;
-			}
-			catch (InterruptedException e)
-			{
-				Thread.currentThread().interrupt();
-			}
+		try{
+		while (currentTick<duration){
+			Thread.sleep(tickTime);
+			sendBroadcast(new TickBroadcast());
+			currentTick++;
+		}}
+		catch (Exception e){}
+		finally {
+			TerminateAll();
 		}
-		//shutdown or whatever you do in the end of the time
-		
 	}
 
 }

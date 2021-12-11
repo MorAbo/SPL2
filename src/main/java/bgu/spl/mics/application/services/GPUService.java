@@ -4,15 +4,12 @@ import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.TestModelEvent;
 import bgu.spl.mics.application.messages.TrainModelEvent;
-import bgu.spl.mics.application.messages.DataPreProcessEvent;
-import bgu.spl.mics.application.messages.TestModelEvent;
-import bgu.spl.mics.application.messages.TrainModelEvent;
 import bgu.spl.mics.application.objects.GPU;
+import bgu.spl.mics.application.objects.Model;
 
 /**
  * GPU service is responsible for handling the
  * {@link TrainModelEvent} and {@link TestModelEvent},
- * in addition to sending the {@link DataPreProcessEvent}.
  * This class may not hold references for objects which it is not responsible for.
  *
  * You can add private fields and public methods to this class.
@@ -31,11 +28,22 @@ public class GPUService extends MicroService {
 
     @Override
     protected void initialize() {
-        // TODO Implement this
-
-        //case : tick bc
-        // gpu.incresetick()
-
+        subscribeEvent(TrainModelEvent.class, message->{
+            Model m = gpu.Train();
+            complete(message,m);
+        });
+        subscribeEvent(TestModelEvent.class, message-> {
+            double d = Math.random();
+            if (message.getStudent().getStatus().equals("MSc")) {
+                if (d >= 0.6) message.getModel().setResult("Bad");
+                else message.getModel().setResult("Good");
+            }
+            else if (message.getStudent().getStatus().equals("PhD")) {
+                if (d >= 0.8) message.getModel().setResult("Bad");
+                else message.getModel().setResult("Good");
+            }
+            complete(message, message.getModel());
+        });
 
     }
 }

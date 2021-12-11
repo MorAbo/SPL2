@@ -129,6 +129,12 @@ public class MessageBusImpl implements MessageBus {
 		return broadcasts.get(type).contains(m);
 	}
 
+	public void terminate(){
+		for(Map.Entry<MicroService, ConcurrentLinkedQueue<Message>> pair: microservices.getSet()){
+			pair.getKey().terminate();
+		}
+	}
+
 	public void Clear(){
 		microservices.clear();
 		broadcasts.clear();

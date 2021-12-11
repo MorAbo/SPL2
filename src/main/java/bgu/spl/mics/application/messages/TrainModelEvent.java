@@ -12,7 +12,7 @@ the CPUS and the relevant GPU.
 public class TrainModelEvent implements Event<Model> {
     private Future<Model> f;
 
-    public TrainModelEvent(){
+    public TrainModelEvent(Model m){
         f=new Future<>();
     }
 

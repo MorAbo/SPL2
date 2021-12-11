@@ -23,6 +23,7 @@ public class ExampleEventHandlerService extends MicroService {
         if (mbt <= 0) {
             throw new IllegalArgumentException("Event Handler expecting the argument mbt to be a number > 0, instead received: " + args[0]);
         }
+
     }
 
     @Override

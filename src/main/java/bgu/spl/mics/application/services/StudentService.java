@@ -2,6 +2,8 @@ package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
+import bgu.spl.mics.application.objects.Model;
 import bgu.spl.mics.application.objects.Student;
 import bgu.spl.mics.application.messages.PublishResultEvent;
 import bgu.spl.mics.application.messages.TestModelEvent;
@@ -22,20 +24,18 @@ public class StudentService extends MicroService {
 
     public StudentService(String name, Student student) {
         super(name);
-        // TODO Implement this
         this.student = student;
     }
 
     @Override
     protected void initialize() {
-        // TODO Implement this
-
+        subscribeBroadcast(PublishConferenceBroadcast.class, message-> {});
+        for (Model m: student.getModels()) {
+            sendEvent(new TrainModelEvent(m));
+            sendEvent(new TestModelEvent(m));
+            sendEvent(new PublishResultEvent(m));
+        }
     }
 
-//    public void SendEvent(){
-//        e = new event();
-//        e.future.set( MessageBusImpl.GetInstance().sendEvent(e));
-//        //f!=null therefor i can manipulate it
-//    }
 
 }

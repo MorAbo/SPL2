@@ -126,23 +126,23 @@ class MessageBusImplTest {
         MicroService m3 = new StudentService("S3", new Student("student3", "CS", "PhD"));
         mb.register(m3);
         mb.subscribeEvent(TrainModelEvent.class, m2);
-        Event e = new TrainModelEvent();
+        Event e = new TrainModelEvent(m);
         mb.sendEvent(e);
         try{ Message msg = mb.awaitMessage(m1);
             assertEquals(msg, e);}
         catch (Exception ex){}
-        Event e1 = new TrainModelEvent();
+        Event e1 = new TrainModelEvent(m);
         mb.sendEvent(e1);
         try{ Message msg = mb.awaitMessage(m2);
             assertEquals(msg, e1);}
         catch (Exception ex){}
-        Event e2 = new TrainModelEvent();
+        Event e2 = new TrainModelEvent(m);
         mb.sendEvent(e2);
         try{ Message msg = mb.awaitMessage(m1);
             assertEquals(msg, e2);}
         catch (Exception ex){}
         //test 2: if no ms is subscribed to the event sends null
-        Event e3 = new TrainModelEvent();
+        Event e3 = new TrainModelEvent(m);
         assertEquals(mb.sendEvent(e3), null);
     }
 

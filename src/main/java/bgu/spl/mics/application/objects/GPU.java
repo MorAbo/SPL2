@@ -92,8 +92,8 @@ public class GPU {
      * @post Disk.isEmpty()
      */
     public void SendData(){
-
-        //cluster.precessdata
+        while (VramCapacityLeft()>0)
+            VRAM.add(cluster.processdata(Disk.remove()));
 
     }
 
@@ -104,6 +104,8 @@ public class GPU {
      */
     public void receiveProcessedData(DataBatch data){
         //addes it to the vram and sends it to train
+
+        //Train
     }
 
     /**
@@ -112,6 +114,13 @@ public class GPU {
      * @post (Model.data.processed) = model.data.size
      */
     public Model Train(){
+        divideData();
+        while (!Disk.isEmpty())
+            SendData();
+
+        //insert into vram
+        //train each db in vram
+
 //        int sum=0;
 //        while(sum!=Math.ceil(model.GetData().getSize() / 1000)) {
 //            while (VRAM.isEmpty()) wait;

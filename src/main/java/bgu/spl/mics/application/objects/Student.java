@@ -10,6 +10,7 @@ import java.util.List;
  * Add fields and methods to this class as you see fit (including public methods and constructors).
  */
 public class Student {
+
     /**
      * Enum representing the Degree the student is studying for.
      */
@@ -47,6 +48,11 @@ public class Student {
         else{
             status = Degree.PhD;
         }
+    }
+    public String getStatus(){ return status.toString();}
+
+    public List<Model> getModels() {
+        return models;
     }
 
 }
