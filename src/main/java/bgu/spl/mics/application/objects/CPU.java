@@ -1,5 +1,7 @@
 package bgu.spl.mics.application.objects;
 
+import bgu.spl.mics.application.services.CPUService;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -14,6 +16,7 @@ public class CPU {
     private int cores;
     private Queue<DataBatch> data;
     private Cluster cluster;
+    private int TimeLeft;
     private int tick;
 
     public CPU(int cores){
@@ -21,13 +24,22 @@ public class CPU {
         cluster = Cluster.getInstance();
         data = new LinkedList<>();
         tick=1;
+        TimeLeft=0;
     }
+
+    public int getFutureTimeLeft(DataBatch db){return TimeLeft+CalTime(db);}
 
     /**
      *increase the tick by 1
      * @pre (tick)==@post(tick)-1
      */
-    public void IncreaseTick(){tick++;}
+    public void IncreaseTick(){tick++; TimeLeft=Math.max(TimeLeft--, 0); notifyAll();}
+
+    private int CalTime(DataBatch db){
+        if(db.getType().equals("Image")) return (32/cores)*4;
+        else if(db.getType().equals("Text")) return (32/cores)*2;
+        else return (32/cores);
+    }
 
     public int dataInLine(){return data.size();}
     /**
@@ -36,7 +48,8 @@ public class CPU {
      *@post (data.size)=@pre(data.size)+1
      */
     public void receiveData(DataBatch dataBatch){
-
+        data.add(dataBatch);
+        TimeLeft+=CalTime(dataBatch);
     }
 
     /**
@@ -45,20 +58,13 @@ public class CPU {
      * @post data.size() = pre(data.size() - 1)
      * @post dataBatch.isProcessed()
      */
-    public DataBatch processData(){
-//        DataBatch d= data.remove();
-//        int currentTick = tick;
-//        while (tick!=currentTick+tick2wait(d.getData())) wait();
-//        d.ProcessData();
-//        return d;
-        return null;
-    }
-
-    private int tick2wait(Data d){
-        if(d.getType()== Data.Type.Images) return (32/cores)*4;
-        if(d.getType()== Data.Type.Text) return (32/cores)*2;
-        else return (32/cores);
-
+    public void processData() throws InterruptedException {
+        DataBatch d= data.remove();
+        int currentTick = tick;
+        while (tick!=currentTick+CalTime(d))
+            wait();
+        d.ProcessData();
+        cluster.ReturnProcessedData(d);
     }
 
 

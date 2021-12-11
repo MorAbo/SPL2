@@ -26,4 +26,5 @@ public class DataBatch {
     public Data getData() { return data; }
 
     public boolean isProcessed(){return processed;}
+    public String getType(){return data.getType().toString();}
 }

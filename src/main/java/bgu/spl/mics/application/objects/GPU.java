@@ -93,7 +93,7 @@ public class GPU {
      */
     public void SendData(){
         while (VramCapacityLeft()>0)
-            VRAM.add(cluster.processdata(Disk.remove()));
+            cluster.processdata(Disk.remove(), this);
 
     }
 
