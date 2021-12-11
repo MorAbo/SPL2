@@ -10,10 +10,21 @@ be processed by one of the GPU microservices. During its process, it will utiliz
 the CPUS and the relevant GPU.
  */
 public class TrainModelEvent implements Event<Model> {
+    private Model m;
     private Future<Model> f;
 
     public TrainModelEvent(Model m){
-        f=new Future<>();
+        this.m=m;
+        f=null;
     }
 
+    @Override
+    public void Resolve(Model result) {
+        m=result;
+        f.resolve(m);
+        notifyAll();
+    }
+    public boolean isResolved(){return f.isDone();}
+    public Model getModel(){return m;}
+    public void SetFuture(Future<Model> f){ this.f=f;}
 }

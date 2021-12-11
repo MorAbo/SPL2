@@ -28,7 +28,7 @@ public class GPU {
         Disk = new LinkedList<>();
         VRAM = new LinkedList<>();
         model = null;
-        tick=0;
+        tick=1;
     }
 
     private Type setType(String type){
@@ -113,7 +113,8 @@ public class GPU {
      * @return the trained model
      * @post (Model.data.processed) = model.data.size
      */
-    public Model Train(){
+    public Model Train(Model m){
+        setModel(m);
         divideData();
         while (!Disk.isEmpty())
             SendData();

@@ -25,6 +25,7 @@ public class Model {
     }
     public void ProcessData(int amount){ data.ProcessData(amount);}
     public Data GetData(){ return data;}
+    public String getName(){return name;}
 
     public void setStatus(String statusString){
         switch (statusString) {
@@ -56,4 +57,6 @@ public class Model {
                 break;
         }
     }
+
+    public boolean IsGood(){ return goodOrBad==result.Good; }
 }

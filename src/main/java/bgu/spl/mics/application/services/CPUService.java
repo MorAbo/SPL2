@@ -1,6 +1,7 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.objects.CPU;
 
 /**
@@ -16,13 +17,12 @@ public class CPUService extends MicroService {
 
     public CPUService(String name, CPU cpu) {
         super(name);
-        // TODO Implement this
         this.cpu = cpu;
     }
 
     @Override
     protected void initialize() {
-        // TODO Implement this
+        subscribeBroadcast(TickBroadcast.class, message-> cpu.IncreaseTick());
 
     }
 }

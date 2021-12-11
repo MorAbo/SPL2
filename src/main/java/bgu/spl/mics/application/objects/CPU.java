@@ -20,6 +20,7 @@ public class CPU {
         this.cores = cores;
         cluster = Cluster.getInstance();
         data = new LinkedList<>();
+        tick=1;
     }
 
     /**

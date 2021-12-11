@@ -11,11 +11,25 @@ public class TestModelEvent implements Event<Model> {
     private Student s;
     private Future<Model> f;
 
-    public Student getStudent(){ return s;}
-    public Model getModel(){ return m;}
-
-    public TestModelEvent(Model m){
+    public TestModelEvent(Model m, Student s){
+        this.m=m;
+        this.s=s;
         f = null;
     }
 
+    public Student getStudent(){ return s;}
+    public Model getModel(){ return m;}
+
+
+    @Override
+    public void Resolve(Model result) {
+        m=result;
+        f.resolve(result);
+        notifyAll();
+    }
+
+    public boolean isResolved(){return f.isDone();}
+    public void setFuture(Future<Model> f) {
+        this.f=f;
+    }
 }

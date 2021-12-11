@@ -1,5 +1,6 @@
 package bgu.spl.mics.application.services;
 
+import bgu.spl.mics.Event;
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
@@ -29,12 +30,27 @@ public class StudentService extends MicroService {
 
     @Override
     protected void initialize() {
-        subscribeBroadcast(PublishConferenceBroadcast.class, message-> {});
-        for (Model m: student.getModels()) {
-            sendEvent(new TrainModelEvent(m));
-            sendEvent(new TestModelEvent(m));
-            sendEvent(new PublishResultEvent(m));
-        }
+        subscribeBroadcast(PublishConferenceBroadcast.class, message-> {
+            for (String name:message.getModelNames()){
+                if (student.isMyModel(name)) student.IncreasePublication();
+                else student.IncreasePapersRead();
+            }
+        });
+        try {
+            for (Model m : student.getModels()) {
+                TrainModelEvent trainEvent = new TrainModelEvent(m);
+                trainEvent.SetFuture(sendEvent(trainEvent));
+                while (!trainEvent.isResolved())
+                    wait();
+                //trainEvent has a trained model
+                TestModelEvent TestEvent= new TestModelEvent(trainEvent.getModel(), student);
+                TestEvent.setFuture(sendEvent(TestEvent));
+                while (!TestEvent.isResolved())
+                    wait();
+                //testEvent is resolved so result is not none
+                sendEvent(new PublishResultEvent(TestEvent.getModel()));
+            }
+        } catch (InterruptedException e) {terminate();}
     }
 
 

@@ -2,8 +2,14 @@ package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.PublishResultEvent;
+import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.objects.ConfrenceInformation;
 import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
+import bgu.spl.mics.application.objects.Model;
+
+import java.awt.*;
+import java.util.LinkedList;
 
 /**
  * Conference service is in charge of
@@ -20,13 +26,23 @@ public class ConferenceService extends MicroService {
 
     public ConferenceService(String name, ConfrenceInformation confrenceInformation) {
         super(name);
-        // TODO Implement this
         this.confrenceInformation = confrenceInformation;
     }
 
     @Override
     protected void initialize() {
-        // TODO Implement this
+        subscribeBroadcast(TickBroadcast.class, message-> {
+            confrenceInformation.IncreaseTick();
+            if (confrenceInformation.shouldRegister())
+                subscribeEvent(PublishResultEvent.class, message_-> {
+                    if (message_.isModelGood())
+                        confrenceInformation.addToModels(message_.getModel());
+                });
+            if (confrenceInformation.shouldPublish()){
+                sendBroadcast(new PublishConferenceBroadcast(confrenceInformation.getModels()));
+                terminate();
+            }
+        });
 
     }
 }

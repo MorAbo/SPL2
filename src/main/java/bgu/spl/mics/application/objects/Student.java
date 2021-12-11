@@ -23,7 +23,6 @@ public class Student {
     private Degree status;
     private int publications;
     private int papersRead;
-    private int tick;
 
     private List<Model> models;
 
@@ -34,7 +33,6 @@ public class Student {
         papersRead = 0;
         models = new LinkedList();
         setDegree(degree);
-        tick=0;
     }
 
     public void addModel(Model model){
@@ -54,5 +52,14 @@ public class Student {
     public List<Model> getModels() {
         return models;
     }
+
+    public boolean isMyModel(String name){
+        for (Model m: models)
+            if (m.getName().equals(name)) return true;
+        return false;
+    }
+
+    public void IncreasePublication(){publications++;}
+    public void IncreasePapersRead(){papersRead++;}
 
 }

@@ -14,4 +14,8 @@ public class ExampleEvent implements Event<String>{
         return senderName;
     }
 
+    @Override
+    public void Resolve(String result) {
+
+    }
 }
