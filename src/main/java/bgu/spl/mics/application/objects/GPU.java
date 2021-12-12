@@ -17,19 +17,19 @@ public class GPU {
     private Type type;
     private Model model;
     private Cluster cluster;
-    private LinkedList<DataBatch> Disk;
     private LinkedList<DataBatch> VRAM;
     private int tick;
+    private int time2train;
 
 
     public GPU(String type){
         this.type = setType(type);
         cluster = Cluster.getInstance();
-        Disk = new LinkedList<>();
+//        Disk = new LinkedList<>();
         VRAM = new LinkedList<>();
         model = null;
         tick=1;
-        cluster.addGPU(this);
+        time2train=0;
     }
 
     private Type setType(String type){
@@ -56,7 +56,6 @@ public class GPU {
     public void setModel(Model model){
         this.model = model;
     }
-    public int DiskCapacity() {return Disk.size();}
 
     /**
      * @return how many more batches i can add to the vram
@@ -82,22 +81,9 @@ public class GPU {
      * @post DISK.size() == Math.ceil(model.data.size() / 1000)
      */
     public void divideData(){
-        for (int i=0; i<model.GetData().getSize() / 1000; i+=1000){
-            Disk.add(new DataBatch(model.GetData(), i));
+        for (int i=0; i<model.GetData().getSize(); i+=1000){
+            cluster.recieveUnprocessedDataBatch( new DataBatch(model.GetData(), i), this);
         }
-    }
-
-    /**
-     * Sends chunks of unprocessed data from the model of batches of 1000 samples using DataBatch
-     * to the cluster
-     * GPU will only send data if it has room to store it when it returns
-     * @pre model.data.processed == 0
-     * @post Disk.isEmpty()
-     */
-    public void SendData(){
-        while (VramCapacityLeft()>0)
-            cluster.processdata(Disk.remove(), this);
-
     }
 
     /**
@@ -105,8 +91,8 @@ public class GPU {
      * as complete.
      * @pre (VRAM.size())+1 = @post(vram.size())
      */
-    public void receiveProcessedData(DataBatch data){
-        VRAM.add(data);
+    public void receiveProcessedDataBatch(DataBatch data){
+        VRAM.add(data); notifyAll(); time2train+=CalTime(data);
     }
 
     /**
@@ -118,13 +104,22 @@ public class GPU {
         setModel(m);
         m.setStatus("Training");
         divideData();
-        while (!Disk.isEmpty())
-            SendData();
-        while (!VRAM.isEmpty())
+        double counter = Math.ceil((float)(model.GetData().getSize())/1000);
+        while (counter>0) {//not finished
+            while (!isThereAnythingToProcess()) wait();
             TrainBatch(VRAM.remove());
+            counter--;
+        }
         cluster.addTrainedModel(model.getName());
         m.setStatus("Trained");
         return model;
+    }
+
+    private boolean isThereAnythingToProcess() {
+        if (!VRAM.isEmpty()) return true;
+        else for (DataBatch db: cluster.GetProcessedData(this))
+            VRAM.add(db);
+        return !VRAM.isEmpty();
     }
 
     /**
@@ -133,11 +128,15 @@ public class GPU {
      * @param db the databatch to train
      */
     private void TrainBatch(DataBatch db) throws InterruptedException {
+        waitByTick(CalTime(db));
+    }
+
+    private int CalTime(DataBatch db){
         if (type.equals(Type.RTX3090))
-            waitByTick(1);
+            return 1;
         if(type.equals(Type.RTX2080))
-            waitByTick(2);
-        else waitByTick(4);
+            return 2;
+        else return 4;
 
 
     }
@@ -146,9 +145,12 @@ public class GPU {
         int CurrentTick=tick;
         while(CurrentTick+tickSum!=tick) {
             wait();
+            time2train--;
             cluster.IncreaseGpuRunTime();
         }
 
     }
+
+    public int getTime2train(){return time2train;}
 
 }

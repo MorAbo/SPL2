@@ -2,9 +2,8 @@ package bgu.spl.mics.application.objects;
 
 import bgu.spl.mics.ReadWriteMap;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Passive object representing the cluster.
@@ -15,14 +14,16 @@ import java.util.List;
  */
 public class Cluster {
 
-	private List<GPU> gpuList;
-	private List<CPU> cpuList;
+	private ReadWriteMap<GPU, ConcurrentLinkedQueue<DataBatch>> unprocessedMap;
+	private ReadWriteMap<GPU, ConcurrentLinkedQueue<DataBatch>> processedMap;
 	private ReadWriteMap<DataBatch, GPU> relevantGpu;
+	private ConcurrentLinkedQueue<CPU> UnoccupiedCpu;
+
+
 	private List<String> modelsTrained;
 	private int dataBatchesProcessedByCPUs;
 	private int cpuTimeUnitsUsed;
 	private int gpuTimeUnitsUsed;
-
 
 
 	private static class ClusterHolder{
@@ -30,13 +31,15 @@ public class Cluster {
 	}
 
 	private Cluster(){
-		gpuList = new LinkedList<>();
-		cpuList = new LinkedList<>();
+		unprocessedMap=new ReadWriteMap<>(new HashMap<>());
+		processedMap=new ReadWriteMap<>(new HashMap<>());
+		relevantGpu=new ReadWriteMap<>(new HashMap<>());
+		UnoccupiedCpu = new ConcurrentLinkedQueue<>();
 		modelsTrained = new LinkedList<>();
 		dataBatchesProcessedByCPUs = 0;
 		cpuTimeUnitsUsed = 0;
 		gpuTimeUnitsUsed = 0;
-		relevantGpu=new ReadWriteMap<>(new HashMap<>());
+
 	}
 
 	/**
@@ -49,7 +52,6 @@ public class Cluster {
 	public void IncreaseCpuRunTime() {
 		cpuTimeUnitsUsed++;
 	}
-
 	public void IncreaseGpuRunTime() {
 		gpuTimeUnitsUsed++;
 	}
@@ -58,28 +60,80 @@ public class Cluster {
 	}
 
 
-	public void addCPU(CPU cpu){cpuList.add(cpu);}
-	public void addGPU(GPU gpu){gpuList.add(gpu);}
+	public void addCPU(CPU cpu){UnoccupiedCpu.add(cpu); notifyAll();}
 
-	//recieves unprossed data from cpu and start the sequence to process it
-	public void processdata(DataBatch db, GPU gpu) {
-		relevantGpu.put(db, gpu);
-		synchronized (cpuList) {
-			CPU target = cpuList.get(0);
-			int minTime = target.getFutureTimeLeft(db);
-			for (CPU cpu : cpuList)
-				if (cpu.getFutureTimeLeft(db) < minTime) {
-					minTime = cpu.getFutureTimeLeft(db);
-					target = cpu;
-				}
-			target.receiveData(db);
-		}
+
+	public void recieveUnprocessedDataBatch(DataBatch dataBatch, GPU gpu){
+		if (!processedMap.containsKey(gpu))
+			processedMap.put(gpu, new ConcurrentLinkedQueue<>());
+		if (!unprocessedMap.containsKey(gpu))
+			unprocessedMap.put(gpu,new ConcurrentLinkedQueue<>());
+		unprocessedMap.get(gpu).add(dataBatch);
+		relevantGpu.put(dataBatch,gpu);
+		notifyAll();
+
 	}
 
-	public void ReturnProcessedData(DataBatch db){
-		relevantGpu.get(db).receiveProcessedData(db);
+
+	public void RecieveProcessedDataBatch(DataBatch db) {
+		GPU relevantGPU= relevantGpu.get(db);
+		if (relevantGPU.VramCapacityLeft()>0)
+			relevantGPU.receiveProcessedDataBatch(db);
+		else processedMap.get(relevantGPU).add(db);
 		relevantGpu.remove(db);
+		unprocessedMap.get(relevantGPU).remove(db);
+		if (unprocessedMap.get(relevantGPU).isEmpty())
+			unprocessedMap.remove(relevantGPU);
 		dataBatchesProcessedByCPUs++;
+	}
+
+	public LinkedList<DataBatch> GetProcessedData(GPU gpu){
+		LinkedList<DataBatch> ans = new LinkedList<>();
+		int count = 0;
+		while (!processedMap.get(gpu).isEmpty() & gpu.VramCapacityLeft()>count){
+			ans.add(processedMap.get(gpu).remove()); count++;}
+		if (processedMap.get(gpu).isEmpty()& !unprocessedMap.containsKey(gpu))
+			processedMap.remove(gpu);
+		return ans;
+	}
+
+	public void Act(){
+		try {
+			while (unprocessedMap.isEmpty()) wait();
+			GPU gpu = chooseGpu();
+			DataBatch db = unprocessedMap.get(gpu).remove();
+			while (UnoccupiedCpu.isEmpty()) wait();
+			CPU cpu = chooseCpu();
+			UnoccupiedCpu.remove(cpu);
+			cpu.receiveUnprocessedDataBatch(db);
+		} catch (InterruptedException e){}
+
+	}
+
+	private GPU chooseGpu(){
+		Iterator<Map.Entry<GPU, ConcurrentLinkedQueue<DataBatch>>> it =unprocessedMap.getSet().iterator();
+		GPU target=it.next().getKey();
+		int minTime=target.getTime2train();
+		while (it.hasNext()) {
+			GPU temp = it.next().getKey();
+			if (minTime > temp.getTime2train()) {
+				minTime=temp.getTime2train();
+				target=temp;
+			}
+		}
+		return target;
+	}
+
+	private CPU chooseCpu(){
+		CPU target = UnoccupiedCpu.peek();
+		int mincores=target.getCores();
+		for (CPU cpu: UnoccupiedCpu){
+			if (cpu.getCores()<mincores){
+				mincores=cpu.getCores();
+				target=cpu;
+			}
+		}
+		return target;
 	}
 
 

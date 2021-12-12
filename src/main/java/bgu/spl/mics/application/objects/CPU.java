@@ -14,27 +14,26 @@ import java.util.Queue;
 public class CPU {
 
     private int cores;
-    private Queue<DataBatch> data;
     private Cluster cluster;
-    private int TimeLeft;
     private int tick;
 
     public CPU(int cores){
         this.cores = cores;
         cluster = Cluster.getInstance();
-        data = new LinkedList<>();
         tick=1;
-        TimeLeft=0;
+        cluster.addCPU(this);
         cluster.addCPU(this);
     }
 
-    public int getFutureTimeLeft(DataBatch db){return TimeLeft+CalTime(db);}
+    //public int getFutureTimeLeft(DataBatch db){return TimeLeft+CalTime(db);}
 
     /**
      *increase the tick by 1
      * @pre (tick)==@post(tick)-1
      */
-    public void IncreaseTick(){tick++; TimeLeft=Math.max(TimeLeft--, 0); notifyAll();}
+    public void IncreaseTick(){tick++; notifyAll();}
+
+    public int getCores(){return cores;}
 
     private int CalTime(DataBatch db){
         if(db.getType().equals("Image")) return (32/cores)*4;
@@ -42,34 +41,22 @@ public class CPU {
         else return (32/cores);
     }
 
-    public int dataInLine(){return data.size();}
     /**
      * adds the dataBatch to the list of data.
-     * @param dataBatch to add to the list data
+     * @param db to add to the list data
      *@post (data.size)=@pre(data.size)+1
      */
-    public void receiveData(DataBatch dataBatch){
-        data.add(dataBatch);
-        TimeLeft+=CalTime(dataBatch);
-    }
-
-    /**
-     * process one of the batches.
-     * @return DataBatch after processing it
-     * @post data.size() = pre(data.size() - 1)
-     * @post dataBatch.isProcessed()
-     */
-    public void processData() throws InterruptedException {
-        DataBatch d= data.remove();
+    public void receiveUnprocessedDataBatch(DataBatch db) throws InterruptedException {
         int currentTick = tick;
-        while (tick!=currentTick+CalTime(d)) {
+        while (tick!=currentTick+CalTime(db)) {
             wait();
             cluster.IncreaseCpuRunTime();
         }
-
-        d.ProcessData();
-        cluster.ReturnProcessedData(d);
+        db.ProcessData();
+        cluster.RecieveProcessedDataBatch(db);
+        cluster.addCPU(this);
     }
+
 
 
 }
