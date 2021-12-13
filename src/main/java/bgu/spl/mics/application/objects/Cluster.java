@@ -17,8 +17,6 @@ public class Cluster {
 	private ReadWriteMap<GPU, ConcurrentLinkedQueue<DataBatch>> unprocessedMap;
 	private ReadWriteMap<GPU, ConcurrentLinkedQueue<DataBatch>> processedMap;
 	private ReadWriteMap<DataBatch, GPU> relevantGpu;
-	private ConcurrentLinkedQueue<CPU> UnoccupiedCpu;
-
 
 	private List<String> modelsTrained;
 	private int dataBatchesProcessedByCPUs;
@@ -34,7 +32,6 @@ public class Cluster {
 		unprocessedMap=new ReadWriteMap<>(new HashMap<>());
 		processedMap=new ReadWriteMap<>(new HashMap<>());
 		relevantGpu=new ReadWriteMap<>(new HashMap<>());
-		UnoccupiedCpu = new ConcurrentLinkedQueue<>();
 		modelsTrained = new LinkedList<>();
 		dataBatchesProcessedByCPUs = 0;
 		cpuTimeUnitsUsed = 0;
@@ -58,10 +55,9 @@ public class Cluster {
 	public void addTrainedModel(String name) {
 		modelsTrained.add(name);
 	}
-
-
-	public void addCPU(CPU cpu){UnoccupiedCpu.add(cpu); notifyAll();}
-
+	public int getCpuTimeUnitsUsed(){return cpuTimeUnitsUsed;}
+	public int getDataBatchesProcessedByCPUs() {return dataBatchesProcessedByCPUs;}
+	public int getGpuTimeUnitsUsed(){return gpuTimeUnitsUsed;}
 
 	public void recieveUnprocessedDataBatch(DataBatch dataBatch, GPU gpu){
 		if (!processedMap.containsKey(gpu))
@@ -71,7 +67,6 @@ public class Cluster {
 		unprocessedMap.get(gpu).add(dataBatch);
 		relevantGpu.put(dataBatch,gpu);
 		notifyAll();
-
 	}
 
 
@@ -97,16 +92,11 @@ public class Cluster {
 		return ans;
 	}
 
-	public void Act(){
+	public DataBatch getNextDataBatchFromCluster(){
 		try {
-			while (unprocessedMap.isEmpty()) wait();
 			GPU gpu = chooseGpu();
-			DataBatch db = unprocessedMap.get(gpu).remove();
-			while (UnoccupiedCpu.isEmpty()) wait();
-			CPU cpu = chooseCpu();
-			UnoccupiedCpu.remove(cpu);
-			cpu.receiveUnprocessedDataBatch(db);
-		} catch (InterruptedException e){}
+			return unprocessedMap.get(gpu).remove();
+		} catch (Exception e){return null;}
 
 	}
 
@@ -124,17 +114,6 @@ public class Cluster {
 		return target;
 	}
 
-	private CPU chooseCpu(){
-		CPU target = UnoccupiedCpu.peek();
-		int mincores=target.getCores();
-		for (CPU cpu: UnoccupiedCpu){
-			if (cpu.getCores()<mincores){
-				mincores=cpu.getCores();
-				target=cpu;
-			}
-		}
-		return target;
-	}
-
+	public boolean isThereDataToProcess(){ return !unprocessedMap.isEmpty();}
 
 }

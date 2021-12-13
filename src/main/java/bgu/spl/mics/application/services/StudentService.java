@@ -9,6 +9,11 @@ import bgu.spl.mics.application.objects.Student;
 import bgu.spl.mics.application.messages.PublishResultEvent;
 import bgu.spl.mics.application.messages.TestModelEvent;
 import bgu.spl.mics.application.messages.TrainModelEvent;
+import bgu.spl.mics.application.outputs.JSONOutput;
+import bgu.spl.mics.application.outputs.ModelOutput;
+import bgu.spl.mics.application.outputs.StudentOutput;
+
+import java.util.LinkedList;
 
 /**
  * Student is responsible for sending the {@link TrainModelEvent},
@@ -51,6 +56,18 @@ public class StudentService extends MicroService {
                 sendEvent(new PublishResultEvent(TestEvent.getModel()));
             }
         } catch (InterruptedException e) {terminate();}
+    }
+    @Override
+    public void shut(){
+        super.shut();
+        LinkedList<ModelOutput> modelOutputs= new LinkedList<>();
+        for (Model m: student.getModels()){
+            if (m.getStatus().equals("Trained") | m.getStatus().equals("Tested"))
+                modelOutputs.add(new ModelOutput(m.getName(),m.GetData(), m.getStatus(), m.getResult()));
+        }
+        StudentOutput so=new StudentOutput(student.getName(), student.getDepartment(), student.getStatus(),
+                student.getPublications(), student.getPapersRead(), modelOutputs);
+        JSONOutput.GetInstance().addStudentOutputs(so);
     }
 
 

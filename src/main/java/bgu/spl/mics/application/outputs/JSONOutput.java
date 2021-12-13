@@ -6,8 +6,14 @@ import com.google.gson.JsonObject;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+import java.util.jar.JarEntry;
 
 public class JSONOutput {
+
+    private static class JsonOutputHolder{
+        private static JSONOutput instance= new JSONOutput();
+
+    }
 
     private List<StudentOutput> studentOutputs;
     private List<ConferenceOutput> conferenceOutputs;
@@ -15,12 +21,22 @@ public class JSONOutput {
     private int gpuTimeUsed;
     private int batchesProcessed;
 
-    public JSONOutput(List<StudentOutput> studentOutputs, List<ConferenceOutput> conferenceOutputs, int cpuTimeUsed, int gpuTimeUsed, int batchesProcessed){
-        this.studentOutputs = studentOutputs;
-        this.conferenceOutputs = conferenceOutputs;
-        this.cpuTimeUsed = cpuTimeUsed;
-        this.gpuTimeUsed = gpuTimeUsed;
-        this.batchesProcessed = batchesProcessed;
+    private JSONOutput(){
+        this.studentOutputs = null;
+        this.conferenceOutputs = null;
+        this.cpuTimeUsed = -1;
+        this.gpuTimeUsed = -1;
+        this.batchesProcessed = -1;
+    }
+
+    public void addStudentOutputs(StudentOutput studentOutput){ studentOutputs.add(studentOutput);}
+    public void addConferenceOutputs(ConferenceOutput conferenceOutput){ conferenceOutputs.add(conferenceOutput);}
+    public void setCpuTimeUsed(int cpuTimeUsed){this.cpuTimeUsed=cpuTimeUsed;}
+    public void setGpuTimeUsed(int gpuTimeUsed){this.gpuTimeUsed=gpuTimeUsed;}
+    public void setBatchesProcessed(int batchesProcessed){this.batchesProcessed=batchesProcessed;}
+
+    public static JSONOutput GetInstance(){
+        return JsonOutputHolder.instance;
     }
 
     public void buildJson(){

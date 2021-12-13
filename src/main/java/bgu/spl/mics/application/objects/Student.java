@@ -38,7 +38,7 @@ public class Student {
     public void addModel(Model model){
         models.add(model);
     }
-
+    public String getName(){return name;}
     private void setDegree(String degree){
         if(degree.equals("MSc")){
             status = Degree.MSc;
@@ -61,5 +61,7 @@ public class Student {
 
     public void IncreasePublication(){publications++;}
     public void IncreasePapersRead(){papersRead++;}
-
+    public String getDepartment() { return department;}
+    public int getPublications() {return publications;}
+    public int getPapersRead() { return papersRead;}
 }

@@ -7,6 +7,9 @@ import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.objects.ConfrenceInformation;
 import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
 import bgu.spl.mics.application.objects.Model;
+import bgu.spl.mics.application.outputs.ConferenceOutput;
+import bgu.spl.mics.application.outputs.JSONOutput;
+import bgu.spl.mics.application.outputs.ModelOutput;
 
 import java.awt.*;
 import java.util.LinkedList;
@@ -44,10 +47,20 @@ public class ConferenceService extends MicroService {
                         confrenceInformation.addToModels(message_.getModel());
                 });
             if (confrenceInformation.shouldPublish()){
-                sendBroadcast(new PublishConferenceBroadcast(confrenceInformation.getModels()));
+                sendBroadcast(new PublishConferenceBroadcast(confrenceInformation.getModelsNames()));
                 terminate();
             }
         });
 
+    }
+    @Override
+    protected void shut(){
+        super.shut();
+        LinkedList<ModelOutput> modelOutputs= new LinkedList<>();
+        for (Model m: confrenceInformation.getModels()){
+            modelOutputs.add(new ModelOutput(m.getName(),m.GetData(), m.getStatus(), m.getResult()));
+        }
+        ConferenceOutput cop = new ConferenceOutput(confrenceInformation.getName(), confrenceInformation.getDate(), modelOutputs);
+        JSONOutput.GetInstance().addConferenceOutputs(cop);
     }
 }

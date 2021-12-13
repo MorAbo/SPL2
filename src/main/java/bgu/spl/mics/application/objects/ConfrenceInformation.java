@@ -14,12 +14,14 @@ public class ConfrenceInformation {
     private int StartDate;
     private int tick;
     private LinkedList<String> modelsName;
+    private LinkedList<Model> models;
 
     public ConfrenceInformation(String name, int EndDate, int StartDate){
         this.name = name;
         this.EndDate = EndDate;
         this.StartDate= StartDate;
         modelsName=new LinkedList<>();
+        models=new LinkedList<>();
         tick=1;
     }
 
@@ -31,9 +33,8 @@ public class ConfrenceInformation {
 
     public boolean shouldRegister(){ return tick==StartDate;}
     public boolean shouldPublish(){ return tick==EndDate; }
-    public void addToModels(Model m){
-        modelsName.add(m.getName());
-    }
-    public LinkedList<String> getModels(){return modelsName;}
+    public void addToModels(Model m){ modelsName.add(m.getName()); models.add(m);}
+    public LinkedList<String> getModelsNames(){return modelsName;}
+    public LinkedList<Model> getModels(){return models;};
 
 }

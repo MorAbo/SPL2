@@ -58,5 +58,8 @@ public class Model {
         }
     }
 
+    public String getStatus(){return isTrained.toString();}
+    public String getResult(){return goodOrBad.toString();}
+
     public boolean IsGood(){ return goodOrBad==result.Good; }
 }

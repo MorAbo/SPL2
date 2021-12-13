@@ -21,8 +21,6 @@ public class CPU {
         this.cores = cores;
         cluster = Cluster.getInstance();
         tick=1;
-        cluster.addCPU(this);
-        cluster.addCPU(this);
     }
 
     //public int getFutureTimeLeft(DataBatch db){return TimeLeft+CalTime(db);}
@@ -43,18 +41,26 @@ public class CPU {
 
     /**
      * adds the dataBatch to the list of data.
-     * @param db to add to the list data
      *@post (data.size)=@pre(data.size)+1
      */
-    public void receiveUnprocessedDataBatch(DataBatch db) throws InterruptedException {
-        int currentTick = tick;
-        while (tick!=currentTick+CalTime(db)) {
-            wait();
-            cluster.IncreaseCpuRunTime();
+    public void process(){
+        try {
+            DataBatch db = cluster.getNextDataBatchFromCluster();
+            while (db != null) {
+                int currentTick = tick;
+                while (tick != currentTick + CalTime(db)) {
+                    wait();
+                    cluster.IncreaseCpuRunTime();
+                }
+                db.ProcessData();
+                cluster.RecieveProcessedDataBatch(db);
+                while (db!=null) {
+                    while (!cluster.isThereDataToProcess()) wait();
+                    db = cluster.getNextDataBatchFromCluster();
+                }
+            }
         }
-        db.ProcessData();
-        cluster.RecieveProcessedDataBatch(db);
-        cluster.addCPU(this);
+        catch (InterruptedException e){};
     }
 
 

@@ -2,14 +2,18 @@ package bgu.spl.mics.application;
 
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.application.objects.*;
+import bgu.spl.mics.application.outputs.JSONOutput;
 import bgu.spl.mics.application.services.*;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import sun.awt.windows.ThemeReader;
 
+import java.awt.*;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.ArrayList;
 
 /**
  * This is the Main class of Compute Resources Management System application. You should parse the input file,
@@ -17,8 +21,19 @@ import java.io.FileReader;
  * In the end, you should output a text file.
  */
 public class CRMSRunner {
+
+    private static ArrayList<Thread> threads = new ArrayList<Thread>();
+
     public static void main(String[] args) {
-        initializeBus(args[0]);
+        try {
+            initializeBus(args[0]);
+            for (Thread t : threads) {t.start();}
+            for (Thread t : threads) {t.join();}
+        } catch (InterruptedException e){e.printStackTrace();}
+        JSONOutput.GetInstance().setCpuTimeUsed(Cluster.getInstance().getCpuTimeUnitsUsed());
+        JSONOutput.GetInstance().setBatchesProcessed(Cluster.getInstance().getDataBatchesProcessedByCPUs());
+        JSONOutput.GetInstance().setGpuTimeUsed(Cluster.getInstance().getGpuTimeUnitsUsed());
+        JSONOutput.GetInstance().buildJson();
     }
 
     private static void initializeBus(String arg){
@@ -30,23 +45,24 @@ public class CRMSRunner {
             JsonObject jsonObject = (JsonObject) obj;
 
             JsonArray studentsArray = (JsonArray) jsonObject.get("Students");
-            parseStudents(studentsArray);
 
             JsonArray gpusArray = (JsonArray) jsonObject.get("GPUS");
-            parseGpus(gpusArray);
 
             JsonArray cpusArray = (JsonArray) jsonObject.get("CPUS");
-            parseCpus(cpusArray);
 
             JsonArray conferencesArray = (JsonArray) jsonObject.get("Conferences");
-            parseConferences(conferencesArray);
 
             int tickTime = jsonObject.get("TickTime").getAsInt();
 
             int duration = jsonObject.get("Duration").getAsInt();
 
+            parseGpus(gpusArray);
+            parseCpus(cpusArray);
+            parseConferences(conferencesArray);
             TimeService timeService = new TimeService(tickTime, duration);
-            messageBus.register(timeService);
+            threads.add(new Thread(timeService));
+            parseStudents(studentsArray);
+
         }
         catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -62,7 +78,6 @@ public class CRMSRunner {
             String status = JSonStudent.get("status").getAsString();
             Student student = new Student(name, department, status);
             StudentService studentService = new StudentService("student service", student);
-            messageBus.register(studentService);
             JsonArray modelsArray = (JsonArray) JSonStudent.get("models");
             for (JsonElement modelElement : modelsArray) {
                 JsonObject JSonModel = modelElement.getAsJsonObject();
@@ -73,6 +88,7 @@ public class CRMSRunner {
                 Model model = new Model(modelName, data, student);
                 student.addModel(model);
             }
+            threads.add(new Thread(studentService));
         }
     }
 
@@ -82,7 +98,8 @@ public class CRMSRunner {
             String gpuType = gpuElement.getAsString();
             GPU gpu = new GPU(gpuType);
             GPUService gpuService = new GPUService("gpu service", gpu);
-            messageBus.register(gpuService);
+            threads.add(new Thread(gpuService));
+
         }
     }
 
@@ -92,7 +109,7 @@ public class CRMSRunner {
             int cpuSize = cpuElement.getAsInt();
             CPU cpu = new CPU(cpuSize);
             CPUService cpuService = new CPUService("cpu service", cpu);
-            messageBus.register(cpuService);
+            threads.add(new Thread(cpuService));
         }
     }
 
@@ -106,7 +123,7 @@ public class CRMSRunner {
             ConfrenceInformation confrenceInformation = new ConfrenceInformation(name, date, oldDate);
             oldDate=date;
             ConferenceService conferenceService = new ConferenceService("conference service", confrenceInformation);
-            messageBus.register(conferenceService);
+            threads.add(new Thread(conferenceService));
         }
     }
 
