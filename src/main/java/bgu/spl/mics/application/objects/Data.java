@@ -22,7 +22,7 @@ public class Data {
         setType(type);
     }
 
-    public Type getType(){ return type;}
+    public String getType(){ return type.toString();}
     public int getProcessed(){return processed;}
     public int getSize(){return size;}
 

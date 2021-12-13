@@ -29,10 +29,10 @@ class FutureTest {
 
     @Test
     void testGet() {
-        //test 1: result un available- waits ans then still unavailable return null
+        //test 1: result unavailable- waits ans then still unavailable return null
         Integer result = (Integer) f.get(1000, TimeUnit.MILLISECONDS);
         assertNull(result);
-        //test 2: result un available- waits ans then available
+        //test 2: result unavailable- waits ans then available
         Thread a = new Thread( ()->{ assertEquals((Integer) f.get(1000, TimeUnit.MILLISECONDS),8);});
         Thread b  = new Thread(()->{ f.resolve(8);});
         a.start();
