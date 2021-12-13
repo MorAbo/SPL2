@@ -8,7 +8,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import sun.awt.windows.ThemeReader;
 
 import java.awt.*;
 import java.io.FileNotFoundException;
@@ -27,8 +26,17 @@ public class CRMSRunner {
     public static void main(String[] args) {
         try {
             initializeBus(args[0]);
-            for (Thread t : threads) {t.start();}
-            for (Thread t : threads) {t.join();}
+//            for (Thread t : threads) {t.start();}
+//            for (Thread t : threads) {t.join();}
+            Thread timethread = threads.get(16);
+            Thread confThread= threads.get(12);
+            Thread confThread2 = threads.get(11);
+            timethread.start();
+            confThread.start();
+            confThread2.start();
+            timethread.join();
+            confThread.join();
+            confThread2.join();
         } catch (InterruptedException e){e.printStackTrace();}
         JSONOutput.GetInstance().setCpuTimeUsed(Cluster.getInstance().getCpuTimeUnitsUsed());
         JSONOutput.GetInstance().setBatchesProcessed(Cluster.getInstance().getDataBatchesProcessedByCPUs());
@@ -60,7 +68,7 @@ public class CRMSRunner {
             parseCpus(cpusArray);
             parseConferences(conferencesArray);
             TimeService timeService = new TimeService(tickTime, duration);
-            threads.add(new Thread(timeService));
+            threads.add(new Thread(timeService, "time service"));
             parseStudents(studentsArray);
 
         }
@@ -71,6 +79,7 @@ public class CRMSRunner {
 
     private static void parseStudents(JsonArray studentsArray) {
         MessageBusImpl messageBus = MessageBusImpl.GetInstance();
+        int i=0;
         for (JsonElement studentElement : studentsArray) {
             JsonObject JSonStudent = studentElement.getAsJsonObject();
             String name = JSonStudent.get("name").getAsString();
@@ -88,34 +97,40 @@ public class CRMSRunner {
                 Model model = new Model(modelName, data, student);
                 student.addModel(model);
             }
-            threads.add(new Thread(studentService));
+            threads.add(new Thread(studentService, "student"+i));
+            i++;
         }
     }
 
     private static void parseGpus(JsonArray gpusArray){
         MessageBusImpl messageBus = MessageBusImpl.GetInstance();
+        int i=0;
         for (JsonElement gpuElement : gpusArray){
             String gpuType = gpuElement.getAsString();
             GPU gpu = new GPU(gpuType);
             GPUService gpuService = new GPUService("gpu service", gpu);
-            threads.add(new Thread(gpuService));
+            threads.add(new Thread(gpuService, "gpu"+i));
+            i++;
 
         }
     }
 
     private static void parseCpus(JsonArray cpusArray){
         MessageBusImpl messageBus = MessageBusImpl.GetInstance();
+        int i=0;
         for (JsonElement cpuElement : cpusArray){
             int cpuSize = cpuElement.getAsInt();
             CPU cpu = new CPU(cpuSize);
             CPUService cpuService = new CPUService("cpu service", cpu);
-            threads.add(new Thread(cpuService));
+            threads.add(new Thread(cpuService, "cpu"+i));
+            i++;
         }
     }
 
     private static void parseConferences(JsonArray conferencesArray){
         MessageBusImpl messageBus = MessageBusImpl.GetInstance();
         int oldDate=1;
+        int i=0;
         for (JsonElement conferenceElement : conferencesArray){
             JsonObject JSonConference = conferenceElement.getAsJsonObject();
             String name = JSonConference.get("name").getAsString();
@@ -123,7 +138,8 @@ public class CRMSRunner {
             ConfrenceInformation confrenceInformation = new ConfrenceInformation(name, date, oldDate);
             oldDate=date;
             ConferenceService conferenceService = new ConferenceService("conference service", confrenceInformation);
-            threads.add(new Thread(conferenceService));
+            threads.add(new Thread(conferenceService, "conferance"+i));
+            i++;
         }
     }
 

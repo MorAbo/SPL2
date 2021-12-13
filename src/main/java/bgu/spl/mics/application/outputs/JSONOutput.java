@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.jar.JarEntry;
 
@@ -22,8 +23,8 @@ public class JSONOutput {
     private int batchesProcessed;
 
     private JSONOutput(){
-        this.studentOutputs = null;
-        this.conferenceOutputs = null;
+        this.studentOutputs = new LinkedList<>();
+        this.conferenceOutputs = new LinkedList<>();
         this.cpuTimeUsed = -1;
         this.gpuTimeUsed = -1;
         this.batchesProcessed = -1;

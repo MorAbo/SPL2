@@ -1,6 +1,5 @@
 package bgu.spl.mics;
 
-import com.sun.tools.javac.util.Pair;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,11 +57,14 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public void sendBroadcast(Broadcast b) {
-		synchronized(broadcasts.get(b.getClass())){
-			for (int i=0; i<broadcasts.get(b.getClass()).size(); i++)
+		if (broadcasts.containsKey(b.getClass()))
+		synchronized(broadcasts.get(b.getClass())){ //queue of all the ms in event type b
+			for (int i=0; i<broadcasts.get(b.getClass()).size(); i++) {
 				microservices.get(broadcasts.get(b.getClass()).get(i)).add(b);
+				synchronized (broadcasts.get(b.getClass()).get(i)){
+				broadcasts.get(b.getClass()).get(i).notify();}
 			}
-		notifyAll();
+		}
 	}
 
 	
@@ -70,6 +72,7 @@ public class MessageBusImpl implements MessageBus {
 	public <T> Future<T> sendEvent(Event<T> e) {
 		synchronized (roundRobin.get(e.getClass())){
 			Integer i = roundRobin.get(e.getClass());
+			if (!events.containsKey(e.getClass())) return null;
 			MicroService m= events.get(e.getClass()).get(i);
 			microservices.get(m).add(e);
 			i=(i+1)%events.get(e.getClass()).size();
@@ -109,8 +112,12 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public Message awaitMessage(MicroService m) throws InterruptedException {
 		if (!IsRegistered(m)) throw new IllegalStateException("service not registered");
-		while (microservices.get(m).isEmpty())
-			m.wait();
+		synchronized (microservices.get(m)) {
+			while (microservices.get(m).isEmpty())
+				synchronized (m) {
+					m.wait();
+				}
+		}
 		return microservices.get(m).poll();
 	}
 

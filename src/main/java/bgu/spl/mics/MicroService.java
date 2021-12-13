@@ -163,7 +163,7 @@ public abstract class MicroService implements Runnable {
     @Override
     public final void run() {
         try {
-            sleep(200);
+            sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
