@@ -1,14 +1,13 @@
 package bgu.spl.mics.application.services;
 
-import bgu.spl.mics.Message;
-import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.TerminateBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
 
 /**
  * TimeService is the global system timer There is only one instance of this micro-service.
  * It keeps track of the amount of ticks passed since initialization and notifies
- * all other micro-services about the current time tick using {@link TickBroadcast}.
+ * all other micro-services about the current time tick using {@link TerminateBroadcast}.
  * This class may not hold references for objects which it is not responsible for.
  * 
  * You can add private fields and public methods to this class.
@@ -35,11 +34,11 @@ public class TimeService extends MicroService{
 			Thread.sleep(tickTime);
 			sendBroadcast(new TickBroadcast());
 			currentTick++;
-		}}
-		catch (Exception e){}
-		finally {
-			TerminateAll();
 		}
+		sendBroadcast(new TerminateBroadcast());
+		terminate();
+		}
+		catch (Exception e){}
 	}
 
 }

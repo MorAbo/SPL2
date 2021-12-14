@@ -28,15 +28,24 @@ public class CRMSRunner {
             initializeBus(args[0]);
 //            for (Thread t : threads) {t.start();}
 //            for (Thread t : threads) {t.join();}
-            Thread timethread = threads.get(16);
-            Thread confThread= threads.get(12);
-            Thread confThread2 = threads.get(11);
-            timethread.start();
-            confThread.start();
-            confThread2.start();
-            timethread.join();
-            confThread.join();
-            confThread2.join();
+//            Thread timethread = threads.get(16);
+//            Thread confThread= threads.get(12);
+//            Thread confThread2 = threads.get(11);
+//            Thread CPUThread = threads.get(4);
+//            Thread GpuThread = threads.get(1);
+            Thread studentThread = threads.get(18);
+//            timethread.start();
+//            confThread.start();
+//            confThread2.start();
+//            GpuThread.start();
+//            CPUThread.start();
+            studentThread.start();
+//            timethread.join();
+//            confThread.join();
+//            confThread2.join();
+//            GpuThread.join();
+//            CPUThread.join();
+            studentThread.join();
         } catch (InterruptedException e){e.printStackTrace();}
         JSONOutput.GetInstance().setCpuTimeUsed(Cluster.getInstance().getCpuTimeUnitsUsed());
         JSONOutput.GetInstance().setBatchesProcessed(Cluster.getInstance().getDataBatchesProcessedByCPUs());

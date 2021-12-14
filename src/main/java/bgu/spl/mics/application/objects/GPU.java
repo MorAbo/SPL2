@@ -62,7 +62,7 @@ public class GPU {
      */
     public int VramCapacityLeft() {
         if (this.type==Type.RTX3090) return 32-VRAM.size();
-        else if (this.type==Type.RTX3090) return 16-VRAM.size();
+        else if (this.type==Type.RTX2080) return 16-VRAM.size();
         else return 8-VRAM.size();
     }
 
@@ -70,7 +70,12 @@ public class GPU {
      *increase the tick by 1
      * @pre (tick)==@post(tick)-1
      */
-    public void IncreaseTick(){tick++; notifyAll();}
+    public void IncreaseTick() {
+        tick++;
+        synchronized (this) {
+            this.notify();
+        }
+    }
 
 
 
@@ -144,7 +149,8 @@ public class GPU {
     private void waitByTick(int tickSum) throws InterruptedException {
         int CurrentTick=tick;
         while(CurrentTick+tickSum!=tick) {
-            wait();
+            synchronized (this){
+            this.wait();}
             time2train--;
             cluster.IncreaseGpuRunTime();
         }

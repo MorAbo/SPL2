@@ -29,7 +29,12 @@ public class CPU {
      *increase the tick by 1
      * @pre (tick)==@post(tick)-1
      */
-    public void IncreaseTick(){tick++; notifyAll();}
+    public void IncreaseTick(){
+        tick++;
+        synchronized (this) {
+            this.notify();
+        }
+    }
 
     public int getCores(){return cores;}
 
@@ -49,7 +54,8 @@ public class CPU {
             while (db != null) {
                 int currentTick = tick;
                 while (tick != currentTick + CalTime(db)) {
-                    wait();
+                    synchronized (this){
+                        this.wait();}
                     cluster.IncreaseCpuRunTime();
                 }
                 db.ProcessData();

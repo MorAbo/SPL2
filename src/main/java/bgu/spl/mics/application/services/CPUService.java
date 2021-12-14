@@ -1,6 +1,7 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.TerminateBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.objects.CPU;
 
@@ -22,6 +23,7 @@ public class CPUService extends MicroService {
     @Override
     protected void initialize() {
         subscribeBroadcast(TickBroadcast.class, message-> cpu.IncreaseTick());
+        subscribeBroadcast(TerminateBroadcast.class, message-> terminate());
         cpu.process();
     }
 

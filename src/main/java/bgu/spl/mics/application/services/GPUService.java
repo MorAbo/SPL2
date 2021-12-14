@@ -4,6 +4,7 @@ import bgu.spl.mics.Event;
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.TestModelEvent;
+import bgu.spl.mics.application.messages.TerminateBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.messages.TrainModelEvent;
 import bgu.spl.mics.application.objects.GPU;
@@ -51,6 +52,7 @@ public class GPUService extends MicroService {
             message.getModel().setStatus("Tested");
         });
         subscribeBroadcast(TickBroadcast.class, message-> gpu.IncreaseTick());
+        subscribeBroadcast(TerminateBroadcast.class, message-> terminate());
 
     }
 }

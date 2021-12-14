@@ -36,18 +36,24 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
-		if (!events.containsKey(type))
-			events.put(type, new ReadWriteList<>());
-		if (!IsSubscribedEvent(type, m))
-			events.get(type).add(m);
+		synchronized (events) {
+			if (!events.containsKey(type)) {
+				events.put(type, new ReadWriteList<>());
+				roundRobin.put(type, 0);
+			}
+			if (!IsSubscribedEvent(type, m))
+				events.get(type).add(m);
+		}
 	}
 
 	@Override
 	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-		if (!broadcasts.containsKey(type))
-			broadcasts.put(type, new ReadWriteList<>());
-		if (!IsSubscribedBroadcast(type, m))
-			broadcasts.get(type).add(m);
+		synchronized (broadcasts) {
+			if (!broadcasts.containsKey(type))
+				broadcasts.put(type, new ReadWriteList<>());
+			if (!IsSubscribedBroadcast(type, m))
+				broadcasts.get(type).add(m);
+		}
 	}
 
 	@Override
@@ -62,7 +68,7 @@ public class MessageBusImpl implements MessageBus {
 			for (int i=0; i<broadcasts.get(b.getClass()).size(); i++) {
 				microservices.get(broadcasts.get(b.getClass()).get(i)).add(b);
 				synchronized (broadcasts.get(b.getClass()).get(i)){
-				broadcasts.get(b.getClass()).get(i).notify();}
+					broadcasts.get(b.getClass()).get(i).notify();}
 			}
 		}
 	}
@@ -74,11 +80,11 @@ public class MessageBusImpl implements MessageBus {
 			Integer i = roundRobin.get(e.getClass());
 			if (!events.containsKey(e.getClass())) return null;
 			MicroService m= events.get(e.getClass()).get(i);
+			synchronized (m){m.notify();}
 			microservices.get(m).add(e);
 			i=(i+1)%events.get(e.getClass()).size();
 			roundRobin.put(e.getClass(),i);
 		}
-		notifyAll();
 		return new Future<>();
 	}
 
@@ -94,16 +100,24 @@ public class MessageBusImpl implements MessageBus {
 		//remove from broad cast
 		for (Map.Entry<Class<? extends Broadcast>, ReadWriteList<MicroService>> pair: broadcasts.getSet()){
 			pair.getValue().remove(m);
+			if (pair.getValue().size()==0) broadcasts.remove(pair.getKey());
 		}
 		//remove from event
 		for (Map.Entry<Class<? extends Message>, ReadWriteList<MicroService>> pair: events.getSet()) {
-			int i = pair.getValue().whereIs(m);
-			if (i != -1) {
-				pair.getValue().remove(m);
-				//round robin where we remove if i>= location of m in events than i--
-				if (roundRobin.get(pair.getKey()) >= i) {
-					i = (i - 1) % pair.getValue().size();
-					roundRobin.put(pair.getKey(), i);
+			synchronized (pair.getValue()) {
+				int i = pair.getValue().whereIs(m);
+				if (i != -1) {
+					pair.getValue().remove(m);
+					if (pair.getValue().size()==0)
+					//round robin where we remove if i>= location of m in events than i--
+					synchronized (roundRobin.get(pair.getKey())) {
+						if (roundRobin.get(pair.getKey())==0)
+							roundRobin.put(pair.getKey(), 0);
+						else if (roundRobin.get(pair.getKey()) >= i) {
+							i = (i - 1) % pair.getValue().size();
+							roundRobin.put(pair.getKey(), i);
+						}
+					}
 				}
 			}
 		}
@@ -117,8 +131,8 @@ public class MessageBusImpl implements MessageBus {
 				synchronized (m) {
 					m.wait();
 				}
+			return microservices.get(m).poll();
 		}
-		return microservices.get(m).poll();
 	}
 
 	@Override
@@ -134,12 +148,6 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public boolean IsSubscribedBroadcast(Class<? extends Broadcast> type, MicroService m) {
 		return broadcasts.get(type).contains(m);
-	}
-
-	public void terminate(){
-		for(Map.Entry<MicroService, ConcurrentLinkedQueue<Message>> pair: microservices.getSet()){
-			pair.getKey().terminate();
-		}
 	}
 
 	public void Clear(){

@@ -1,8 +1,8 @@
 package bgu.spl.mics.application.services;
 
-import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.PublishResultEvent;
+import bgu.spl.mics.application.messages.TerminateBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.objects.ConfrenceInformation;
 import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
@@ -11,7 +11,6 @@ import bgu.spl.mics.application.outputs.ConferenceOutput;
 import bgu.spl.mics.application.outputs.JSONOutput;
 import bgu.spl.mics.application.outputs.ModelOutput;
 
-import java.awt.*;
 import java.util.LinkedList;
 
 /**
@@ -34,6 +33,7 @@ public class ConferenceService extends MicroService {
 
     @Override
     protected void initialize() {
+        subscribeBroadcast(TerminateBroadcast.class, message-> terminate());
         if (confrenceInformation.shouldRegister())
             subscribeEvent(PublishResultEvent.class, message_-> {
                 if (message_.isModelGood())

@@ -1,16 +1,4 @@
-import static org.junit.jupiter.api.Assertions.*;
-
 import bgu.spl.mics.*;
-import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
-import bgu.spl.mics.application.messages.TestModelEvent;
-import bgu.spl.mics.application.messages.TickBroadcast;
-import bgu.spl.mics.application.messages.TrainModelEvent;
-import bgu.spl.mics.application.objects.Student;
-import bgu.spl.mics.application.services.StudentService;
-import bgu.spl.mics.example.messages.ExampleEvent;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 
 class MessageBusImplTest {

@@ -3,12 +3,9 @@ package bgu.spl.mics.application.services;
 import bgu.spl.mics.Event;
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
+import bgu.spl.mics.application.messages.*;
 import bgu.spl.mics.application.objects.Model;
 import bgu.spl.mics.application.objects.Student;
-import bgu.spl.mics.application.messages.PublishResultEvent;
-import bgu.spl.mics.application.messages.TestModelEvent;
-import bgu.spl.mics.application.messages.TrainModelEvent;
 import bgu.spl.mics.application.outputs.JSONOutput;
 import bgu.spl.mics.application.outputs.ModelOutput;
 import bgu.spl.mics.application.outputs.StudentOutput;
@@ -35,6 +32,7 @@ public class StudentService extends MicroService {
 
     @Override
     protected void initialize() {
+        subscribeBroadcast(TerminateBroadcast.class, message-> terminate());
         subscribeBroadcast(PublishConferenceBroadcast.class, message-> {
             for (String name:message.getModelNames()){
                 if (student.isMyModel(name)) student.IncreasePublication();
@@ -46,7 +44,9 @@ public class StudentService extends MicroService {
                 TrainModelEvent trainEvent = new TrainModelEvent(m);
                 trainEvent.SetFuture(sendEvent(trainEvent));
                 while (!trainEvent.isResolved())
-                    wait();
+                    synchronized (this) {
+                        trainEvent.wait();
+                    }
                 //trainEvent has a trained model
                 TestModelEvent TestEvent= new TestModelEvent(trainEvent.getModel(), student);
                 TestEvent.setFuture(sendEvent(TestEvent));

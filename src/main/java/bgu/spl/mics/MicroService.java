@@ -144,9 +144,6 @@ public abstract class MicroService implements Runnable {
         this.terminated = true;
     }
 
-    protected final void TerminateAll(){
-        bus.terminate();
-    }
 
     /**
      * @return the name of the service - the service name is given to it in the
