@@ -18,6 +18,7 @@ public class TestModelEvent implements Event<Model> {
 
     public Student getStudent(){ return s;}
     public Model getModel(){ return m;}
+    public Future<Model> getFuture(){return f;}
 
 
     @Override
@@ -26,7 +27,7 @@ public class TestModelEvent implements Event<Model> {
         f.resolve(result);
         notifyAll();
     }
-
+    public boolean isSent(){return f!=null;}
     public boolean isResolved(){return f.isDone();}
     public void setFuture(Future<Model> f) {
         this.f=f;

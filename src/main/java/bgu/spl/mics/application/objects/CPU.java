@@ -21,6 +21,7 @@ public class CPU {
         this.cores = cores;
         cluster = Cluster.getInstance();
         tick=1;
+        cluster.addWaitingCpu(this);
     }
 
     //public int getFutureTimeLeft(DataBatch db){return TimeLeft+CalTime(db);}
@@ -39,7 +40,7 @@ public class CPU {
     public int getCores(){return cores;}
 
     private int CalTime(DataBatch db){
-        if(db.getType().equals("Image")) return (32/cores)*4;
+        if(db.getType().equals("Images")) return (32/cores)*4;
         else if(db.getType().equals("Text")) return (32/cores)*2;
         else return (32/cores);
     }
@@ -50,21 +51,36 @@ public class CPU {
      */
     public void process(){
         try {
-            DataBatch db = cluster.getNextDataBatchFromCluster();
-            while (db != null) {
-                int currentTick = tick;
-                while (tick != currentTick + CalTime(db)) {
-                    synchronized (this){
-                        this.wait();}
-                    cluster.IncreaseCpuRunTime();
+                DataBatch db = cluster.getNextDataBatchFromCluster();
+                while (db != null) {
+                    cluster.removeWaitingCpu(this);
+                    int currentTick = tick;
+                    while (tick != currentTick + CalTime(db)) {
+                        int i = 1;
+                        synchronized (this) {
+                            this.wait();
+                        }
+                        if (tick == currentTick + i) {
+                            cluster.IncreaseCpuRunTime();
+                            i++;
+                        }
+                    }
+                    db.ProcessData();
+                    cluster.RecieveProcessedDataBatch(db);
+                    while (db != null) {
+                        while (!cluster.isThereDataToProcess()) {
+                            cluster.addWaitingCpu(this);
+                            synchronized (this) {
+                                this.wait();
+                            }
+                        }
+                        db = cluster.getNextDataBatchFromCluster();
+                    }
                 }
-                db.ProcessData();
-                cluster.RecieveProcessedDataBatch(db);
-                while (db!=null) {
-                    while (!cluster.isThereDataToProcess()) wait();
-                    db = cluster.getNextDataBatchFromCluster();
+                cluster.addWaitingCpu(this);
+                synchronized (this) {
+                    this.wait();
                 }
-            }
         }
         catch (InterruptedException e){};
     }

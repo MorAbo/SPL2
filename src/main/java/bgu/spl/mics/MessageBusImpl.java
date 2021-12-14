@@ -76,6 +76,7 @@ public class MessageBusImpl implements MessageBus {
 	
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
+		if(roundRobin.get(e.getClass())==null) return null;
 		synchronized (roundRobin.get(e.getClass())){
 			Integer i = roundRobin.get(e.getClass());
 			if (!events.containsKey(e.getClass())) return null;

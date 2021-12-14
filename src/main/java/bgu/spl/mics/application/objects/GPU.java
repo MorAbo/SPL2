@@ -97,7 +97,7 @@ public class GPU {
      * @pre (VRAM.size())+1 = @post(vram.size())
      */
     public void receiveProcessedDataBatch(DataBatch data){
-        VRAM.add(data); notifyAll(); time2train+=CalTime(data);
+        VRAM.add(data); synchronized (this){this.notify();} time2train+=CalTime(data);
     }
 
     /**
@@ -111,13 +111,15 @@ public class GPU {
         divideData();
         double counter = Math.ceil((float)(model.GetData().getSize())/1000);
         while (counter>0) {//not finished
-            while (!isThereAnythingToProcess()) wait();
+            while (!isThereAnythingToProcess()) synchronized (this){this.wait();}
             TrainBatch(VRAM.remove());
             counter--;
         }
         cluster.addTrainedModel(model.getName());
         m.setStatus("Trained");
-        return model;
+        Model model_ = this.model;
+        this.model=null;
+        return model_;
     }
 
     private boolean isThereAnythingToProcess() {
@@ -127,6 +129,9 @@ public class GPU {
         return !VRAM.isEmpty();
     }
 
+    public boolean isInTheMiddleOfTraining(){
+        return model!=null;
+    }
     /**
      * trains a databatch
      * (train=wait the appropriate amount of ticks)

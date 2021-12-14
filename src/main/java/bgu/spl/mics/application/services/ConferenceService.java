@@ -36,6 +36,12 @@ public class ConferenceService extends MicroService {
         subscribeBroadcast(TerminateBroadcast.class, message-> terminate());
         if (confrenceInformation.shouldRegister())
             subscribeEvent(PublishResultEvent.class, message_-> {
+                while (message_.getModel().getResult().equals("None"))
+                    try {
+                        synchronized (message_.getModel()) {
+                            message_.getModel().wait();
+                        }
+                    }catch (InterruptedException e){terminate();}
                 if (message_.isModelGood())
                     confrenceInformation.addToModels(message_.getModel());
             });

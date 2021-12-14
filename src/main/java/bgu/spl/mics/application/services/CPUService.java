@@ -24,7 +24,6 @@ public class CPUService extends MicroService {
     protected void initialize() {
         subscribeBroadcast(TickBroadcast.class, message-> cpu.IncreaseTick());
         subscribeBroadcast(TerminateBroadcast.class, message-> terminate());
-        cpu.process();
     }
 
 

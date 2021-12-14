@@ -21,6 +21,7 @@ public class PublishResultEvent implements Event<String> {
     public boolean isModelGood(){return m.IsGood();}
 
     public Model getModel(){return m;}
+    public boolean isSent(){return f!=null;}
 
 
 

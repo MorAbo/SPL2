@@ -1,6 +1,7 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.Event;
+import bgu.spl.mics.Future;
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.*;
@@ -39,23 +40,42 @@ public class StudentService extends MicroService {
                 else student.IncreasePapersRead();
             }
         });
-        try {
-            for (Model m : student.getModels()) {
-                TrainModelEvent trainEvent = new TrainModelEvent(m);
+        for (Model m : student.getModels()){
+            TrainModelEvent trainEvent= new TrainModelEvent(m);
+            while (!trainEvent.isSent())
                 trainEvent.SetFuture(sendEvent(trainEvent));
-                while (!trainEvent.isResolved())
-                    synchronized (this) {
-                        trainEvent.wait();
-                    }
-                //trainEvent has a trained model
-                TestModelEvent TestEvent= new TestModelEvent(trainEvent.getModel(), student);
-                TestEvent.setFuture(sendEvent(TestEvent));
-                while (!TestEvent.isResolved())
-                    wait();
-                //testEvent is resolved so result is not none
-                sendEvent(new PublishResultEvent(TestEvent.getModel()));
-            }
-        } catch (InterruptedException e) {terminate();}
+            TestModelEvent testEvent = new TestModelEvent(m, student);
+            testEvent.setFuture(sendEvent(testEvent));
+            while (!testEvent.isSent())
+                testEvent.setFuture(sendEvent(testEvent));
+            sendEvent(new PublishResultEvent(testEvent.getModel()));
+        }
+
+//        try {
+//            for (Model m : student.getModels()) {
+//                TrainModelEvent trainEvent = new TrainModelEvent(m);
+//                while (!trainEvent.isSent()) {
+//                    trainEvent.SetFuture(sendEvent(trainEvent));
+//                    synchronized (this) {this.wait(50);}
+//                }
+//                while (!trainEvent.isResolved())
+//                    synchronized (trainEvent) {
+//                        trainEvent.wait();
+//                    }
+//                //trainEvent has a trained model
+//                TestModelEvent TestEvent= new TestModelEvent(trainEvent.getModel(), student);
+//                while (!trainEvent.isSent()) {
+//                    TestEvent.setFuture(sendEvent(TestEvent));
+//                    synchronized (this) {this.wait(50);}
+//                }
+//                while (!TestEvent.isResolved())
+//                    synchronized (this) {
+//                        trainEvent.wait();
+//                    }
+//                //testEvent is resolved so result is not none
+//                sendEvent(new PublishResultEvent(TestEvent.getModel()));
+//            }
+//        } catch (InterruptedException e) {terminate();
     }
     @Override
     public void shut(){

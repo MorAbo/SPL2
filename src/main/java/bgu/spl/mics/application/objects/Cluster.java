@@ -1,9 +1,11 @@
 package bgu.spl.mics.application.objects;
 
+import bgu.spl.mics.ReadWriteList;
 import bgu.spl.mics.ReadWriteMap;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.Lock;
 
 /**
  * Passive object representing the cluster.
@@ -17,11 +19,13 @@ public class Cluster {
 	private ReadWriteMap<GPU, ConcurrentLinkedQueue<DataBatch>> unprocessedMap;
 	private ReadWriteMap<GPU, ConcurrentLinkedQueue<DataBatch>> processedMap;
 	private ReadWriteMap<DataBatch, GPU> relevantGpu;
-
-	private List<String> modelsTrained;
+	private ReadWriteList<String> modelsTrained;
 	private int dataBatchesProcessedByCPUs;
 	private int cpuTimeUnitsUsed;
 	private int gpuTimeUnitsUsed;
+	private ReadWriteList<CPU> waitingCpu;
+
+
 
 
 	private static class ClusterHolder{
@@ -32,10 +36,11 @@ public class Cluster {
 		unprocessedMap=new ReadWriteMap<>(new HashMap<>());
 		processedMap=new ReadWriteMap<>(new HashMap<>());
 		relevantGpu=new ReadWriteMap<>(new HashMap<>());
-		modelsTrained = new LinkedList<>();
+		modelsTrained = new ReadWriteList<>();
 		dataBatchesProcessedByCPUs = 0;
 		cpuTimeUnitsUsed = 0;
 		gpuTimeUnitsUsed = 0;
+		waitingCpu= new ReadWriteList<>();
 
 	}
 
@@ -58,6 +63,8 @@ public class Cluster {
 	public int getCpuTimeUnitsUsed(){return cpuTimeUnitsUsed;}
 	public int getDataBatchesProcessedByCPUs() {return dataBatchesProcessedByCPUs;}
 	public int getGpuTimeUnitsUsed(){return gpuTimeUnitsUsed;}
+	public void addWaitingCpu(CPU cpu) { waitingCpu.add(cpu);}
+	public void removeWaitingCpu(CPU cpu){waitingCpu.remove(cpu);}
 
 	public void recieveUnprocessedDataBatch(DataBatch dataBatch, GPU gpu){
 		if (!processedMap.containsKey(gpu))
@@ -66,7 +73,14 @@ public class Cluster {
 			unprocessedMap.put(gpu,new ConcurrentLinkedQueue<>());
 		unprocessedMap.get(gpu).add(dataBatch);
 		relevantGpu.put(dataBatch,gpu);
-		notifyAll();
+		synchronized (waitingCpu) {
+			for (int i = 0; i < waitingCpu.size(); i++)
+				synchronized (waitingCpu.get(i)) {
+					waitingCpu.get(i).notify();
+					waitingCpu.get(i).process();
+				}
+		}
+
 	}
 
 

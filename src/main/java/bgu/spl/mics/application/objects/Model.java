@@ -42,6 +42,9 @@ public class Model {
                 isTrained = status.Tested;
                 break;
         }
+        synchronized (this) {
+            this.notifyAll();
+        }
     }
 
     public void setResult(String resultString){
@@ -55,6 +58,9 @@ public class Model {
             case "Bad":
                 goodOrBad = result.Bad;
                 break;
+        }
+        synchronized (this) {
+            this.notifyAll();
         }
     }
 

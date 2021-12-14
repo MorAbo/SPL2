@@ -167,7 +167,7 @@ public abstract class MicroService implements Runnable {
         initialize();
         while (!terminated) {
             try{
-                Message m= MessageBusImpl.GetInstance().awaitMessage(this);
+                Message m= awaitMessage();
                 callbacks.get(m.getClass()).call(m);
             }
             catch (InterruptedException e)
@@ -176,6 +176,10 @@ public abstract class MicroService implements Runnable {
             }
         }
         shut();
+    }
+
+    protected Message awaitMessage() throws InterruptedException {
+        return MessageBusImpl.GetInstance().awaitMessage(this);
     }
 
     protected void shut(){
