@@ -63,24 +63,24 @@ public class Cluster {
 	public int getCpuTimeUnitsUsed(){return cpuTimeUnitsUsed;}
 	public int getDataBatchesProcessedByCPUs() {return dataBatchesProcessedByCPUs;}
 	public int getGpuTimeUnitsUsed(){return gpuTimeUnitsUsed;}
-	public void addWaitingCpu(CPU cpu) { waitingCpu.add(cpu);}
+	public void addWaitingCpu(CPU cpu) { waitingCpu.add(cpu); synchronized (this){this.notify();}}
 	public void removeWaitingCpu(CPU cpu){waitingCpu.remove(cpu);}
 
-	public void recieveUnprocessedDataBatch(DataBatch dataBatch, GPU gpu){
+	public void recieveUnprocessedDataBatch(DataBatch dataBatch, GPU gpu) {
 		if (!processedMap.containsKey(gpu))
 			processedMap.put(gpu, new ConcurrentLinkedQueue<>());
 		if (!unprocessedMap.containsKey(gpu))
-			unprocessedMap.put(gpu,new ConcurrentLinkedQueue<>());
+			unprocessedMap.put(gpu, new ConcurrentLinkedQueue<>());
 		unprocessedMap.get(gpu).add(dataBatch);
-		relevantGpu.put(dataBatch,gpu);
-		synchronized (waitingCpu) {
-			for (int i = 0; i < waitingCpu.size(); i++)
-				synchronized (waitingCpu.get(i)) {
-					waitingCpu.get(i).notify();
-					waitingCpu.get(i).process();
+		relevantGpu.put(dataBatch, gpu);
+		synchronized (unprocessedMap.get(gpu)) {
+			synchronized (waitingCpu) {
+				if (waitingCpu.size() != 0) {
+					waitingCpu.get(0).recieveUnprocessedBatch(dataBatch);
+					unprocessedMap.get(gpu).remove(dataBatch);
 				}
+			}
 		}
-
 	}
 
 

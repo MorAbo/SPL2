@@ -37,13 +37,6 @@ public class ConferenceService extends MicroService {
             System.out.println("conf got terminated");});
         if (confrenceInformation.shouldRegister())
             subscribeEvent(PublishResultEvent.class, message_-> {
-                while (message_.getModel().getResult().equals("None"))
-                    try {
-                        synchronized (message_.getModel()) {
-                            message_.getModel().wait();
-                        }
-                    }catch (InterruptedException e){terminate();}
-                if (message_.isModelGood())
                     confrenceInformation.addToModels(message_.getModel());
             });
         subscribeBroadcast(TickBroadcast.class, message-> {
@@ -51,11 +44,10 @@ public class ConferenceService extends MicroService {
             System.out.println("conf got tick");
             if (confrenceInformation.shouldRegister())
                 subscribeEvent(PublishResultEvent.class, message_-> {
-                    if (message_.isModelGood())
                         confrenceInformation.addToModels(message_.getModel());
                 });
             if (confrenceInformation.shouldPublish()){
-                sendBroadcast(new PublishConferenceBroadcast(confrenceInformation.getModelsNames()));
+                sendBroadcast(new PublishConferenceBroadcast(confrenceInformation.publish()));
                 terminate();
             }
         });

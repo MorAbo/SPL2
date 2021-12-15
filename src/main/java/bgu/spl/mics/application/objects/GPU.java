@@ -18,18 +18,25 @@ public class GPU {
     private Model model;
     private Cluster cluster;
     private LinkedList<DataBatch> VRAM;
-    private int tick;
     private int time2train;
+    private DataBatch training_now;
+    private int TimeLeftForBatch;
+    private double batchesLeftToProcessForModel;
+    private boolean isTrainingBatch;
+    private boolean isFinished;
 
 
     public GPU(String type){
         this.type = setType(type);
-        cluster = Cluster.getInstance();
-//        Disk = new LinkedList<>();
-        VRAM = new LinkedList<>();
         model = null;
-        tick=1;
+        cluster = Cluster.getInstance();
+        VRAM = new LinkedList<>();
         time2train=0;
+        training_now=null;
+        TimeLeftForBatch=0;
+        batchesLeftToProcessForModel=0;
+        isTrainingBatch=false;
+        isFinished=false;
     }
 
     private Type setType(String type){
@@ -55,7 +62,10 @@ public class GPU {
      */
     public void setModel(Model model){
         this.model = model;
+        isFinished=false;
+        batchesLeftToProcessForModel=Math.ceil((float)(model.GetData().getSize())/1000);
     }
+    public Model getModel(){return model;}
 
     /**
      * @return how many more batches i can add to the vram
@@ -71,10 +81,9 @@ public class GPU {
      * @pre (tick)==@post(tick)-1
      */
     public void IncreaseTick() {
-        tick++;
-        synchronized (this) {
-            this.notify();
-        }
+        time2train= Math.max(0, time2train--);
+        TimeLeftForBatch=Math.max(0, TimeLeftForBatch--);
+        if (TimeLeftForBatch==0) finishedTrainingBatch();
     }
 
 
@@ -85,7 +94,7 @@ public class GPU {
      * @pre DISK.isEmpty();
      * @post DISK.size() == Math.ceil(model.data.size() / 1000)
      */
-    public void divideData(){
+    private void divideData(){
         for (int i=0; i<model.GetData().getSize(); i+=1000){
             cluster.recieveUnprocessedDataBatch( new DataBatch(model.GetData(), i), this);
         }
@@ -97,7 +106,8 @@ public class GPU {
      * @pre (VRAM.size())+1 = @post(vram.size())
      */
     public void receiveProcessedDataBatch(DataBatch data){
-        VRAM.add(data); synchronized (this){this.notify();} time2train+=CalTime(data);
+        VRAM.add(data); time2train+=CalTime(data);
+        if(!isTrainingBatch) TrainBatch(VRAM.pop());
     }
 
     /**
@@ -105,21 +115,10 @@ public class GPU {
      * @return the trained model
      * @post (Model.data.processed) = model.data.size
      */
-    public Model Train(Model m) throws InterruptedException {
+    public void Train(Model m){
         setModel(m);
         m.setStatus("Training");
         divideData();
-        double counter = Math.ceil((float)(model.GetData().getSize())/1000);
-        while (counter>0) {//not finished
-            while (!isThereAnythingToProcess()) synchronized (this){this.wait();}
-            TrainBatch(VRAM.remove());
-            counter--;
-        }
-        cluster.addTrainedModel(model.getName());
-        m.setStatus("Trained");
-        Model model_ = this.model;
-        this.model=null;
-        return model_;
     }
 
     private boolean isThereAnythingToProcess() {
@@ -137,8 +136,9 @@ public class GPU {
      * (train=wait the appropriate amount of ticks)
      * @param db the databatch to train
      */
-    private void TrainBatch(DataBatch db) throws InterruptedException {
-        waitByTick(CalTime(db));
+    private void TrainBatch(DataBatch db){
+        training_now=db;
+        TimeLeftForBatch=CalTime(db);
     }
 
     private int CalTime(DataBatch db){
@@ -147,21 +147,24 @@ public class GPU {
         if(type.equals(Type.RTX2080))
             return 2;
         else return 4;
-
-
     }
 
-    private void waitByTick(int tickSum) throws InterruptedException {
-        int CurrentTick=tick;
-        while(CurrentTick+tickSum!=tick) {
-            synchronized (this){
-            this.wait();}
-            time2train--;
-            cluster.IncreaseGpuRunTime();
-        }
-
+    private void finishedTrainingBatch(){
+        batchesLeftToProcessForModel--;
+        if (batchesLeftToProcessForModel==0) finishedModel();
+        else if (!VRAM.isEmpty())
+            TrainBatch(VRAM.pop());
+        else training_now=null;
     }
 
+    private void finishedModel(){
+        cluster.addTrainedModel(model.getName());
+        model.setStatus("Trained");
+        this.model=null;
+        isFinished=true;
+    }
+
+    public boolean isFinished(){return isFinished;}
     public int getTime2train(){return time2train;}
 
 }

@@ -118,22 +118,23 @@ public class MessageBusImpl implements MessageBus {
 						pair.getValue().remove(m);
 						if (pair.getValue().size() == 0) {
 							toRemoveE.add(pair.getKey());
-							//round robin where we remove if i>= location of m in events than i--
-							synchronized (roundRobin.get(pair.getKey())) {
-								if (roundRobin.get(pair.getKey()) == 0)
-									roundRobin.put(pair.getKey(), 0);
-								else if (roundRobin.get(pair.getKey()) >= i) {
-									i = (i - 1) % pair.getValue().size();
-									roundRobin.put(pair.getKey(), i);
-								}
+						}
+						//round robin where we remove if i>= location of m in events than i--
+						else synchronized (roundRobin.get(pair.getKey())) {
+							if (roundRobin.get(pair.getKey()) == 0)
+								roundRobin.put(pair.getKey(), 0);
+							else if (roundRobin.get(pair.getKey()) >= i) {
+								i = (i - 1) % pair.getValue().size();
+								roundRobin.put(pair.getKey(), i);
 							}
 						}
+
 					}
 				}
 			}
 
 			for (Class<? extends Message> c : toRemoveE)
-				events.remove(c);
+			{events.remove(c); roundRobin.remove(c);}
 		}
 		microservices.remove(m);
 	}

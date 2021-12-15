@@ -26,6 +26,8 @@ public class GPUService extends MicroService {
 
     private GPU gpu;
     Queue<Event> notTickEvents;
+    private TrainModelEvent trainModelEvent;
+
 
     public GPUService(String name, GPU gpu) {
         super(name);
@@ -33,14 +35,14 @@ public class GPUService extends MicroService {
         this.gpu = gpu;
         MessageBusImpl.GetInstance().register(this);
         notTickEvents= new LinkedList<>();
+        trainModelEvent=null;
     }
 
     @Override
     protected void initialize() {
         subscribeEvent(TrainModelEvent.class, message->{
-            try { if (gpu.isInTheMiddleOfTraining()) notTickEvents.add(message);
-                else{ Model m = gpu.Train(message.getModel());
-            complete(message,m);}} catch (InterruptedException e){terminate();}
+            if (gpu.isInTheMiddleOfTraining()) notTickEvents.add(message);
+                else {gpu.Train(message.getModel()); trainModelEvent=message;}
         });
         subscribeEvent(TestModelEvent.class, message-> {
             if (gpu.isInTheMiddleOfTraining()) notTickEvents.add(message);
@@ -64,16 +66,17 @@ public class GPUService extends MicroService {
             message.getModel().setStatus("Tested");
         }});
         subscribeBroadcast(TickBroadcast.class, message-> {gpu.IncreaseTick();
-            System.out.println("gpu to tick");});
+            System.out.println("gpu to tick");
+            if(gpu.isFinished()) complete(trainModelEvent, gpu.getModel()); trainModelEvent=null;});
         subscribeBroadcast(TerminateBroadcast.class, message-> {terminate();
             System.out.println("gpu to terminated");});
     }
 
     @Override
     protected Message awaitMessage() throws InterruptedException {
-        if (!notTickEvents.isEmpty())
-            return notTickEvents.remove();
-        else return super.awaitMessage();
+        if (gpu.isInTheMiddleOfTraining() | notTickEvents.isEmpty())
+            return super.awaitMessage();
+        else return notTickEvents.remove();
     }
 
     }
