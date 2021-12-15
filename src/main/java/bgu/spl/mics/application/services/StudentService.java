@@ -51,31 +51,6 @@ public class StudentService extends MicroService {
             sendEvent(new PublishResultEvent(testEvent.getModel()));
         }
 
-//        try {
-//            for (Model m : student.getModels()) {
-//                TrainModelEvent trainEvent = new TrainModelEvent(m);
-//                while (!trainEvent.isSent()) {
-//                    trainEvent.SetFuture(sendEvent(trainEvent));
-//                    synchronized (this) {this.wait(50);}
-//                }
-//                while (!trainEvent.isResolved())
-//                    synchronized (trainEvent) {
-//                        trainEvent.wait();
-//                    }
-//                //trainEvent has a trained model
-//                TestModelEvent TestEvent= new TestModelEvent(trainEvent.getModel(), student);
-//                while (!trainEvent.isSent()) {
-//                    TestEvent.setFuture(sendEvent(TestEvent));
-//                    synchronized (this) {this.wait(50);}
-//                }
-//                while (!TestEvent.isResolved())
-//                    synchronized (this) {
-//                        trainEvent.wait();
-//                    }
-//                //testEvent is resolved so result is not none
-//                sendEvent(new PublishResultEvent(TestEvent.getModel()));
-//            }
-//        } catch (InterruptedException e) {terminate();
     }
     @Override
     public void shut(){

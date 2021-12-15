@@ -22,8 +22,10 @@ public class CPUService extends MicroService {
 
     @Override
     protected void initialize() {
-        subscribeBroadcast(TickBroadcast.class, message-> cpu.IncreaseTick());
-        subscribeBroadcast(TerminateBroadcast.class, message-> terminate());
+        subscribeBroadcast(TickBroadcast.class, message-> {cpu.IncreaseTick();
+            System.out.println("CPU got tick");});
+        subscribeBroadcast(TerminateBroadcast.class, message-> {terminate();
+            System.out.println("CPU got terminated");});
     }
 
 

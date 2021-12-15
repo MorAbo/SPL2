@@ -63,8 +63,10 @@ public class GPUService extends MicroService {
             complete(message, message.getModel());
             message.getModel().setStatus("Tested");
         }});
-        subscribeBroadcast(TickBroadcast.class, message-> gpu.IncreaseTick());
-        subscribeBroadcast(TerminateBroadcast.class, message-> terminate());
+        subscribeBroadcast(TickBroadcast.class, message-> {gpu.IncreaseTick();
+            System.out.println("gpu to tick");});
+        subscribeBroadcast(TerminateBroadcast.class, message-> {terminate();
+            System.out.println("gpu to terminated");});
     }
 
     @Override

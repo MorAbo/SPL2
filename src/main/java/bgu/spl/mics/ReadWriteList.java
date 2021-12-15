@@ -65,7 +65,8 @@ public class ReadWriteList<E> {
 
         try {
             return list.get(index);
-        } finally {
+        }
+        finally {
             readLock.unlock();
         }
     }

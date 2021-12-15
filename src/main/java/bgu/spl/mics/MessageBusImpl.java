@@ -1,6 +1,7 @@
 package bgu.spl.mics;
 
 
+import java.awt.List;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -75,9 +76,9 @@ public class MessageBusImpl implements MessageBus {
 
 	
 	@Override
-	public <T> Future<T> sendEvent(Event<T> e) {
+	public  <T> Future<T> sendEvent(Event<T> e) {
 		if(roundRobin.get(e.getClass())==null) return null;
-		synchronized (roundRobin.get(e.getClass())){
+		synchronized (events.get(e.getClass())){
 			Integer i = roundRobin.get(e.getClass());
 			if (!events.containsKey(e.getClass())) return null;
 			MicroService m= events.get(e.getClass()).get(i);
@@ -96,32 +97,45 @@ public class MessageBusImpl implements MessageBus {
 	}
 
 	@Override
-	public void unregister(MicroService m) {
-		microservices.remove(m);
+	public  void unregister(MicroService m) {
 		//remove from broad cast
-		for (Map.Entry<Class<? extends Broadcast>, ReadWriteList<MicroService>> pair: broadcasts.getSet()){
-			pair.getValue().remove(m);
-			if (pair.getValue().size()==0) broadcasts.remove(pair.getKey());
+		LinkedList<Class<? extends Broadcast>> toRemoveB = new LinkedList<>();
+		synchronized (broadcasts) {
+			for (Map.Entry<Class<? extends Broadcast>, ReadWriteList<MicroService>> pair : broadcasts.getSet()) {
+				pair.getValue().remove(m);
+				if (pair.getValue().size() == 0) toRemoveB.add(pair.getKey());
+			}
+			for (Class<? extends Broadcast> c : toRemoveB)
+				broadcasts.remove(c);
 		}
 		//remove from event
-		for (Map.Entry<Class<? extends Message>, ReadWriteList<MicroService>> pair: events.getSet()) {
-			synchronized (pair.getValue()) {
-				int i = pair.getValue().whereIs(m);
-				if (i != -1) {
-					pair.getValue().remove(m);
-					if (pair.getValue().size()==0)
-					//round robin where we remove if i>= location of m in events than i--
-					synchronized (roundRobin.get(pair.getKey())) {
-						if (roundRobin.get(pair.getKey())==0)
-							roundRobin.put(pair.getKey(), 0);
-						else if (roundRobin.get(pair.getKey()) >= i) {
-							i = (i - 1) % pair.getValue().size();
-							roundRobin.put(pair.getKey(), i);
+		LinkedList<Class<? extends Message>> toRemoveE = new LinkedList<>();
+		synchronized (events) {
+			for (Map.Entry<Class<? extends Message>, ReadWriteList<MicroService>> pair : events.getSet()) {
+				synchronized (pair.getValue()) {
+					int i = pair.getValue().whereIs(m);
+					if (i != -1) {
+						pair.getValue().remove(m);
+						if (pair.getValue().size() == 0) {
+							toRemoveE.add(pair.getKey());
+							//round robin where we remove if i>= location of m in events than i--
+							synchronized (roundRobin.get(pair.getKey())) {
+								if (roundRobin.get(pair.getKey()) == 0)
+									roundRobin.put(pair.getKey(), 0);
+								else if (roundRobin.get(pair.getKey()) >= i) {
+									i = (i - 1) % pair.getValue().size();
+									roundRobin.put(pair.getKey(), i);
+								}
+							}
 						}
 					}
 				}
 			}
+
+			for (Class<? extends Message> c : toRemoveE)
+				events.remove(c);
 		}
+		microservices.remove(m);
 	}
 
 	@Override
