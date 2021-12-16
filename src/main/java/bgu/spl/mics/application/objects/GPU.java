@@ -160,11 +160,12 @@ public class GPU {
     private void finishedModel(){
         cluster.addTrainedModel(model.getName());
         model.setStatus("Trained");
-        this.model=null;
         isFinished=true;
     }
 
-    public boolean isFinished(){return isFinished;}
+    public boolean isFinished(){
+        if (!isFinished) return false;
+        else {isFinished=false; model=null; return true; }}
     public int getTime2train(){return time2train;}
 
 }
