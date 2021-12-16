@@ -78,11 +78,13 @@ public class Cluster {
 			unprocessedMap.put(gpu, new ConcurrentLinkedQueue<>());
 		unprocessedMap.get(gpu).add(dataBatch);
 		relevantGpu.put(dataBatch, gpu);
+		if (unprocessedMap.containsKey(gpu))
 		synchronized (unprocessedMap.get(gpu)) {
 			synchronized (waitingCpu) {
 				if (waitingCpu.size() != 0) {
-					waitingCpu.get(0).recieveUnprocessedBatch(dataBatch);
-					unprocessedMap.get(gpu).remove(dataBatch);
+					waitingCpu.get(0).recieveUnprocessedBatch(unprocessedMap.get(gpu).poll());
+					if (unprocessedMap.get(gpu).isEmpty()) unprocessedMap.remove(gpu);
+					///unprocessedMap.get(gpu).remove(dataBatch);
 				}
 			}
 		}
@@ -94,9 +96,6 @@ public class Cluster {
 			if (relevantGPU.VramCapacityLeft() > 0)
 				relevantGPU.receiveProcessedDataBatch(db);
 			else processedMap.get(relevantGPU).add(db);
-			unprocessedMap.get(relevantGPU).remove(db);
-			if (unprocessedMap.get(relevantGPU).isEmpty())
-				unprocessedMap.remove(relevantGPU);
 			IncreaceDataBatchesProccesed();
 	}
 
@@ -113,7 +112,9 @@ public class Cluster {
 	public DataBatch getNextDataBatchFromCluster(){
 		try {
 			GPU gpu = chooseGpu();
-			return unprocessedMap.get(gpu).remove();
+			DataBatch db =unprocessedMap.get(gpu).remove();
+			if (unprocessedMap.get(gpu).isEmpty()) unprocessedMap.remove(gpu);
+			return db;
 		} catch (Exception e){return null;}
 
 	}

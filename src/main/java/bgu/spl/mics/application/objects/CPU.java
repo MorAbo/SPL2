@@ -36,6 +36,7 @@ public class CPU {
     public void IncreaseTick(){
         timeLeftToProcessBatch=timeLeftToProcessBatch-1;
         timeLeftToProcessBatch=Math.max(0, timeLeftToProcessBatch--);
+        System.out.println(timeLeftToProcessBatch);
         if (timeLeftToProcessBatch==0 & processingBatch!=null) {
             finishedBatch();}
     }
@@ -49,18 +50,23 @@ public class CPU {
     }
 
     public void recieveUnprocessedBatch(DataBatch db){
+        cluster.removeWaitingCpu(this);
         processingBatch=db;
         timeLeftToProcessBatch=CalTime(db);
-        System.out.println(" gpu got a batch");
+        System.out.println(timeLeftToProcessBatch);
+        System.out.println(" cpu got a batch");
     }
 
     public void finishedBatch(){
-        System.out.println("gpu finished batch");
+        System.out.println("cpu finished batch");
         processingBatch.ProcessData();
         cluster.RecieveProcessedDataBatch(processingBatch);
         DataBatch db = cluster.getNextDataBatchFromCluster();
         if (db!=null) recieveUnprocessedBatch(db);
-        else cluster.addWaitingCpu(this);
-        timeLeftToProcessBatch=Integer.MAX_VALUE;
+        else {
+            cluster.addWaitingCpu(this);
+            timeLeftToProcessBatch = Integer.MAX_VALUE;
+            processingBatch = null;
+        }
     }
 }
