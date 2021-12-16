@@ -33,15 +33,13 @@ public class ConferenceService extends MicroService {
 
     @Override
     protected void initialize() {
-        subscribeBroadcast(TerminateBroadcast.class, message-> {terminate();
-            System.out.println("conf got terminated");});
+        subscribeBroadcast(TerminateBroadcast.class, message-> {terminate(); });
         if (confrenceInformation.shouldRegister())
             subscribeEvent(PublishResultEvent.class, message_-> {
                     confrenceInformation.addToModels(message_.getModel());
             });
         subscribeBroadcast(TickBroadcast.class, message-> {
             confrenceInformation.IncreaseTick();
-            System.out.println("conf got tick");
             if (confrenceInformation.shouldRegister())
                 subscribeEvent(PublishResultEvent.class, message_-> {
                         confrenceInformation.addToModels(message_.getModel());

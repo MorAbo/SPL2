@@ -63,7 +63,9 @@ public class GPU {
     public void setModel(Model model){
         this.model = model;
         isFinished=false;
-        batchesLeftToProcessForModel=Math.ceil((float)(model.GetData().getSize())/1000);
+        if (model!=null)
+            batchesLeftToProcessForModel=Math.ceil((float)(model.GetData().getSize())/1000);
+        else batchesLeftToProcessForModel=Integer.MAX_VALUE;
     }
     public Model getModel(){return model;}
 
@@ -165,7 +167,7 @@ public class GPU {
 
     public boolean isFinished(){
         if (!isFinished) return false;
-        else {isFinished=false; model=null; return true; }}
+        else {isFinished=false; return true; }}
     public int getTime2train(){return time2train;}
 
 }

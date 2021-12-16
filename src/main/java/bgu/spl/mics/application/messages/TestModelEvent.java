@@ -25,7 +25,7 @@ public class TestModelEvent implements Event<Model> {
     public void Resolve(Model result) {
         m=result;
         f.resolve(result);
-        notifyAll();
+        synchronized (m){m.notifyAll();}
     }
     public boolean isSent(){return f!=null;}
     public boolean isResolved(){return f.isDone();}

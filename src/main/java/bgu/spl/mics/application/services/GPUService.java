@@ -49,7 +49,7 @@ public class GPUService extends MicroService {
             else{
                 try {
                     while (message.getModel().getStatus() != "Trained")
-                        synchronized (this) {
+                        synchronized (message.getModel()) {
                             message.getModel().wait();
                         }
                 }catch (InterruptedException e){ terminate();}
@@ -66,10 +66,11 @@ public class GPUService extends MicroService {
             message.getModel().setStatus("Tested");
         }});
         subscribeBroadcast(TickBroadcast.class, message-> {gpu.IncreaseTick();
-            System.out.println("gpu to tick");
-            if(gpu.isFinished()) complete(trainModelEvent, gpu.getModel()); trainModelEvent=null;});
-        subscribeBroadcast(TerminateBroadcast.class, message-> {terminate();
-            System.out.println("gpu to terminated");});
+            if(gpu.isFinished()) {
+                Model m = gpu.getModel();
+                gpu.setModel(null);
+                complete(trainModelEvent, m);}});
+        subscribeBroadcast(TerminateBroadcast.class, message-> {terminate();});
     }
 
     @Override

@@ -20,9 +20,9 @@ public class Cluster {
 	private ReadWriteMap<GPU, ConcurrentLinkedQueue<DataBatch>> processedMap;
 	private ReadWriteMap<DataBatch, GPU> relevantGpu;
 	private ReadWriteList<String> modelsTrained;
-	private int dataBatchesProcessedByCPUs;
-	private int cpuTimeUnitsUsed;
-	private int gpuTimeUnitsUsed;
+	private Integer dataBatchesProcessedByCPUs;
+	private Integer cpuTimeUnitsUsed;
+	private Integer gpuTimeUnitsUsed;
 	private ReadWriteList<CPU> waitingCpu;
 
 
@@ -52,10 +52,15 @@ public class Cluster {
 	}
 
 	public void IncreaseCpuRunTime() {
-		cpuTimeUnitsUsed++;
+		synchronized (cpuTimeUnitsUsed){
+		cpuTimeUnitsUsed++;}
 	}
 	public void IncreaseGpuRunTime() {
-		gpuTimeUnitsUsed++;
+		synchronized (gpuTimeUnitsUsed){
+		gpuTimeUnitsUsed++;}
+	}
+	public void IncreaceDataBatchesProccesed(){
+		synchronized (dataBatchesProcessedByCPUs){dataBatchesProcessedByCPUs++;}
 	}
 	public void addTrainedModel(String name) {
 		modelsTrained.add(name);
@@ -85,15 +90,14 @@ public class Cluster {
 
 
 	public void RecieveProcessedDataBatch(DataBatch db) {
-		GPU relevantGPU= relevantGpu.get(db);
-		if (relevantGPU.VramCapacityLeft()>0)
-			relevantGPU.receiveProcessedDataBatch(db);
-		else processedMap.get(relevantGPU).add(db);
-		relevantGpu.remove(db);
-		unprocessedMap.get(relevantGPU).remove(db);
-		if (unprocessedMap.get(relevantGPU).isEmpty())
-			unprocessedMap.remove(relevantGPU);
-		dataBatchesProcessedByCPUs++;
+			GPU relevantGPU = relevantGpu.remove(db);
+			if (relevantGPU.VramCapacityLeft() > 0)
+				relevantGPU.receiveProcessedDataBatch(db);
+			else processedMap.get(relevantGPU).add(db);
+			unprocessedMap.get(relevantGPU).remove(db);
+			if (unprocessedMap.get(relevantGPU).isEmpty())
+				unprocessedMap.remove(relevantGPU);
+			IncreaceDataBatchesProccesed();
 	}
 
 	public LinkedList<DataBatch> GetProcessedData(GPU gpu){
