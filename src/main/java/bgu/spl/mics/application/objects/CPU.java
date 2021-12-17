@@ -34,9 +34,9 @@ public class CPU {
      * @pre (tick)==@post(tick)-1
      */
     public void IncreaseTick(){
+        if(timeLeftToProcessBatch>0) cluster.IncreaseCpuRunTime();
         timeLeftToProcessBatch=timeLeftToProcessBatch-1;
         timeLeftToProcessBatch=Math.max(0, timeLeftToProcessBatch--);
-        System.out.println(timeLeftToProcessBatch);
         if (timeLeftToProcessBatch==0 & processingBatch!=null) {
             finishedBatch();}
     }
@@ -53,12 +53,9 @@ public class CPU {
         cluster.removeWaitingCpu(this);
         processingBatch=db;
         timeLeftToProcessBatch=CalTime(db);
-        System.out.println(timeLeftToProcessBatch);
-        System.out.println(" cpu got a batch");
     }
 
     public void finishedBatch(){
-        System.out.println("cpu finished batch");
         processingBatch.ProcessData();
         cluster.RecieveProcessedDataBatch(processingBatch);
         DataBatch db = cluster.getNextDataBatchFromCluster();

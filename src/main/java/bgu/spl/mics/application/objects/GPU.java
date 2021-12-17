@@ -84,7 +84,10 @@ public class GPU {
      */
     public void IncreaseTick() {
         time2train= Math.max(0, time2train--);
-        TimeLeftForBatch=Math.max(0, TimeLeftForBatch--);
+        if (TimeLeftForBatch>0) cluster.IncreaseGpuRunTime();
+        TimeLeftForBatch=TimeLeftForBatch-1;
+        TimeLeftForBatch=Math.max(0, TimeLeftForBatch);
+        System.out.println(TimeLeftForBatch);
         if (TimeLeftForBatch==0) finishedTrainingBatch();
     }
 
@@ -108,8 +111,9 @@ public class GPU {
      * @pre (VRAM.size())+1 = @post(vram.size())
      */
     public void receiveProcessedDataBatch(DataBatch data){
-        VRAM.add(data); time2train+=CalTime(data);
-        if(!isTrainingBatch) TrainBatch(VRAM.pop());
+        VRAM.add(data);
+        time2train+=CalTime(data);
+        if(!isTrainingBatch){ TrainBatch(VRAM.pop());}
     }
 
     /**
@@ -139,8 +143,10 @@ public class GPU {
      * @param db the databatch to train
      */
     private void TrainBatch(DataBatch db){
+        System.out.println("gpu train batch");
         training_now=db;
         TimeLeftForBatch=CalTime(db);
+        isTrainingBatch=true;
     }
 
     private int CalTime(DataBatch db){
@@ -154,15 +160,16 @@ public class GPU {
     private void finishedTrainingBatch(){
         batchesLeftToProcessForModel--;
         if (batchesLeftToProcessForModel==0) finishedModel();
-        else if (!VRAM.isEmpty())
-            TrainBatch(VRAM.pop());
-        else training_now=null;
+        else if (!VRAM.isEmpty()){
+            TrainBatch(VRAM.pop());}
+        else {training_now=null; isTrainingBatch=false;}
     }
 
     private void finishedModel(){
         cluster.addTrainedModel(model.getName());
         model.setStatus("Trained");
         isFinished=true;
+        System.out.println("finished Model "+ model.getName());
     }
 
     public boolean isFinished(){
