@@ -4,10 +4,7 @@ import bgu.spl.mics.Event;
 import bgu.spl.mics.Message;
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.messages.TestModelEvent;
-import bgu.spl.mics.application.messages.TerminateBroadcast;
-import bgu.spl.mics.application.messages.TickBroadcast;
-import bgu.spl.mics.application.messages.TrainModelEvent;
+import bgu.spl.mics.application.messages.*;
 import bgu.spl.mics.application.objects.GPU;
 import bgu.spl.mics.application.objects.Model;
 
@@ -37,7 +34,6 @@ public class GPUService extends MicroService {
         MessageBusImpl.GetInstance().register(this);
         notTickEvents= new LinkedList<>();
         trainModelEvent=null;
-        testModelEvent=null;
 
     }
 
@@ -49,14 +45,15 @@ public class GPUService extends MicroService {
         });
         subscribeEvent(TestModelEvent.class, message-> {
             if (gpu.isInTheMiddleOfTraining()) notTickEvents.add(message);
-            else{ testModelEvent = message; handelingTest();
+            else{handelingTest(message);
         }});
         subscribeBroadcast(TickBroadcast.class, message-> {gpu.IncreaseTick();
             if(gpu.isFinished()) {
                 Model m = gpu.getModel();
                 gpu.setModel(null);
-                complete(trainModelEvent, m);}
-            if(testModelEvent!=null) handelingTest();
+                complete(trainModelEvent, m);
+                sendBroadcast(new FinishedTrainingBroadcast(m.getName()));
+            }
         });
         subscribeBroadcast(TerminateBroadcast.class, message-> {terminate();
             System.out.println("               "+Thread.currentThread().getName()+" terminated");});
@@ -69,7 +66,7 @@ public class GPUService extends MicroService {
         else return notTickEvents.remove();
     }
 
-    private void handelingTest(){
+    private void handelingTest(TestModelEvent testModelEvent){
         if (testModelEvent.getModel().getStatus() == "Trained"){
         double d = Math.random();
         if (testModelEvent.getStudent().getStatus().equals("MSc")) {
@@ -82,8 +79,7 @@ public class GPUService extends MicroService {
         }
         complete(testModelEvent, testModelEvent.getModel());
         testModelEvent.getModel().setStatus("Tested");}
-        testModelEvent=null;
-
+        sendBroadcast(new FinishedTestingBroadcast(testModelEvent.getModel().getName()));
     }
 
     }

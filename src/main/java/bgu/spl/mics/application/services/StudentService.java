@@ -40,15 +40,25 @@ public class StudentService extends MicroService {
                 else student.IncreasePapersRead();
             }
         });
+        subscribeBroadcast(FinishedTrainingBroadcast.class, message->{
+            Model m = student.getModelByName(message.getModel());
+            if (m!=null){
+                TestModelEvent testEvent = new TestModelEvent(m, student);
+                testEvent.setFuture(sendEvent(testEvent));
+                while (!testEvent.isSent())
+                    testEvent.setFuture(sendEvent(testEvent));
+            }
+        });
+        subscribeBroadcast(FinishedTestingBroadcast.class, message->{
+            Model m = student.getModelByName(message.getModel());
+            if (m!=null){
+                sendEvent(new PublishResultEvent(m));
+            }
+        });
         for (Model m : student.getModels()){
             TrainModelEvent trainEvent= new TrainModelEvent(m);
             while (!trainEvent.isSent())
                 trainEvent.SetFuture(sendEvent(trainEvent));
-            TestModelEvent testEvent = new TestModelEvent(m, student);
-            testEvent.setFuture(sendEvent(testEvent));
-            while (!testEvent.isSent())
-                testEvent.setFuture(sendEvent(testEvent));
-            sendEvent(new PublishResultEvent(testEvent.getModel()));
         }
 
     }

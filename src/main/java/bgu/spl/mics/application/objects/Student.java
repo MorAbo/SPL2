@@ -59,6 +59,13 @@ public class Student {
         return false;
     }
 
+    public Model getModelByName(String name){
+        for (Model m:models)
+            if (m.getName()==name)
+                return m;
+        return null;
+    }
+
     public void IncreasePublication(){publications++;}
     public void IncreasePapersRead(){papersRead++;}
     public String getDepartment() { return department;}

@@ -1,12 +1,93 @@
 {
     "students":[
         {
+            "name":"Pumba",
+            "department":"Computer Science",
+            "status":"PhD",
+            "publications":0,
+            "papersRead":0,
+            "trainedModels":[
+                {
+                    "name":"Bert",
+                    "data":{
+                        "type":"Text",
+                        "size":1000000}
+                    ,
+                    "status":"Tested",
+                    "results":"Good"}
+                ,
+                {
+                    "name":"GPT4",
+                    "data":{
+                        "type":"Text",
+                        "size":1000000}
+                    ,
+                    "status":"Trained",
+                    "results":"None"}
+                ,
+                {
+                    "name":"GPT5",
+                    "data":{
+                        "type":"Text",
+                        "size":200000}
+                    ,
+                    "status":"Tested",
+                    "results":"Bad"}
+                ,
+                {
+                    "name":"GPT10",
+                    "data":{
+                        "type":"Text",
+                        "size":50000}
+                    ,
+                    "status":"Tested",
+                    "results":"Bad"}
+                ]
+            }
+        ,
+        {
+            "name":"Simba",
+            "department":"Computer Science",
+            "status":"MSc",
+            "publications":0,
+            "papersRead":0,
+            "trainedModels":[
+                {
+                    "name":"YOLO10",
+                    "data":{
+                        "type":"Images",
+                        "size":200000}
+                    ,
+                    "status":"Tested",
+                    "results":"Good"}
+                ,
+                {
+                    "name":"DensestNet",
+                    "data":{
+                        "type":"Images",
+                        "size":200000}
+                    ,
+                    "status":"Tested",
+                    "results":"Good"}
+                ]
+            }
+        ,
+        {
             "name":"Timon",
             "department":"SE",
             "status":"MSc",
             "publications":0,
             "papersRead":0,
             "trainedModels":[
+                {
+                    "name":"Percepetron",
+                    "data":{
+                        "type":"Tabular",
+                        "size":1000000}
+                    ,
+                    "status":"Tested",
+                    "results":"Good"}
+                ,
                 {
                     "name":"GNN",
                     "data":{
@@ -22,8 +103,8 @@
                         "type":"Images",
                         "size":100000}
                     ,
-                    "status":"Trained",
-                    "results":"None"}
+                    "status":"Tested",
+                    "results":"Good"}
                 ,
                 {
                     "name":"ConditionalGAN",
@@ -31,8 +112,8 @@
                         "type":"Images",
                         "size":500000}
                     ,
-                    "status":"Trained",
-                    "results":"None"}
+                    "status":"Tested",
+                    "results":"Good"}
                 ]
             }
         ,
@@ -60,7 +141,7 @@
                         "size":100000}
                     ,
                     "status":"Tested",
-                    "results":"Good"}
+                    "results":"Bad"}
                 ,
                 {
                     "name":"VIT2",
@@ -79,78 +160,6 @@
                     ,
                     "status":"Trained",
                     "results":"None"}
-                ,
-                {
-                    "name":"DenserNet",
-                    "data":{
-                        "type":"Images",
-                        "size":100000}
-                    ,
-                    "status":"Tested",
-                    "results":"Good"}
-                ]
-            }
-        ,
-        {
-            "name":"Pumba",
-            "department":"Computer Science",
-            "status":"PhD",
-            "publications":0,
-            "papersRead":0,
-            "trainedModels":[
-                {
-                    "name":"Bert",
-                    "data":{
-                        "type":"Text",
-                        "size":1000000}
-                    ,
-                    "status":"Trained",
-                    "results":"None"}
-                ,
-                {
-                    "name":"GPT5",
-                    "data":{
-                        "type":"Text",
-                        "size":200000}
-                    ,
-                    "status":"Tested",
-                    "results":"Good"}
-                ]
-            }
-        ,
-        {
-            "name":"Simba",
-            "department":"Computer Science",
-            "status":"MSc",
-            "publications":0,
-            "papersRead":0,
-            "trainedModels":[
-                {
-                    "name":"YOLO10",
-                    "data":{
-                        "type":"Images",
-                        "size":200000}
-                    ,
-                    "status":"Tested",
-                    "results":"Good"}
-                ,
-                {
-                    "name":"ResNet9000",
-                    "data":{
-                        "type":"Images",
-                        "size":200000}
-                    ,
-                    "status":"Tested",
-                    "results":"Good"}
-                ,
-                {
-                    "name":"LessEfficientNet",
-                    "data":{
-                        "type":"Images",
-                        "size":20000}
-                    ,
-                    "status":"Tested",
-                    "results":"Good"}
                 ]
             }
         ]
@@ -164,22 +173,8 @@
             }
         ,
         {
-            "name":"NeurIPS",
-            "date":25000,
-            "publications":[
-                ]
-            }
-        ,
-        {
             "name":"ECCV",
             "date":40000,
-            "publications":[
-                ]
-            }
-        ,
-        {
-            "name":"AISTATS",
-            "date":50000,
             "publications":[
                 ]
             }
@@ -188,15 +183,6 @@
             "name":"ICML",
             "date":20000,
             "publications":[
-                {
-                    "name":"GNN",
-                    "data":{
-                        "type":"Tabular",
-                        "size":1000000}
-                    ,
-                    "status":"Tested",
-                    "results":"Good"}
-                ,
                 {
                     "name":"YOLO10",
                     "data":{
@@ -207,7 +193,25 @@
                     "results":"Good"}
                 ,
                 {
-                    "name":"YOLO9000",
+                    "name":"ConditionalGAN",
+                    "data":{
+                        "type":"Images",
+                        "size":500000}
+                    ,
+                    "status":"Tested",
+                    "results":"Good"}
+                ,
+                {
+                    "name":"Percepetron",
+                    "data":{
+                        "type":"Tabular",
+                        "size":1000000}
+                    ,
+                    "status":"Tested",
+                    "results":"Good"}
+                ,
+                {
+                    "name":"MoreStyleGAN",
                     "data":{
                         "type":"Images",
                         "size":100000}
@@ -216,16 +220,16 @@
                     "results":"Good"}
                 ,
                 {
-                    "name":"GPT5",
+                    "name":"Bert",
                     "data":{
                         "type":"Text",
-                        "size":200000}
+                        "size":1000000}
                     ,
                     "status":"Tested",
                     "results":"Good"}
                 ,
                 {
-                    "name":"ResNet9000",
+                    "name":"DensestNet",
                     "data":{
                         "type":"Images",
                         "size":200000}
@@ -234,26 +238,31 @@
                     "results":"Good"}
                 ,
                 {
-                    "name":"LessEfficientNet",
+                    "name":"GNN",
                     "data":{
-                        "type":"Images",
-                        "size":20000}
-                    ,
-                    "status":"Tested",
-                    "results":"Good"}
-                ,
-                {
-                    "name":"DenserNet",
-                    "data":{
-                        "type":"Images",
-                        "size":100000}
+                        "type":"Tabular",
+                        "size":1000000}
                     ,
                     "status":"Tested",
                     "results":"Good"}
                 ]
             }
+        ,
+        {
+            "name":"NeurIPS",
+            "date":25000,
+            "publications":[
+                ]
+            }
+        ,
+        {
+            "name":"AISTATS",
+            "date":50000,
+            "publications":[
+                ]
+            }
         ]
     ,
-    "cpuTimeUsed":34783,
-    "gpuTimeUsed":10742,
-    "batchesProcessed":7592}
+    "cpuTimeUsed":34785,
+    "gpuTimeUsed":11685,
+    "batchesProcessed":8867}
