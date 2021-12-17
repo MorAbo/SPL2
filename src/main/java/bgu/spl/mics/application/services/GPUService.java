@@ -27,6 +27,7 @@ public class GPUService extends MicroService {
     private GPU gpu;
     Queue<Event> notTickEvents;
     private TrainModelEvent trainModelEvent;
+    private TestModelEvent testModelEvent;
 
 
     public GPUService(String name, GPU gpu) {
@@ -36,6 +37,8 @@ public class GPUService extends MicroService {
         MessageBusImpl.GetInstance().register(this);
         notTickEvents= new LinkedList<>();
         trainModelEvent=null;
+        testModelEvent=null;
+
     }
 
     @Override
@@ -46,31 +49,17 @@ public class GPUService extends MicroService {
         });
         subscribeEvent(TestModelEvent.class, message-> {
             if (gpu.isInTheMiddleOfTraining()) notTickEvents.add(message);
-            else{
-                try {
-                    while (message.getModel().getStatus() != "Trained")
-                        synchronized (message.getModel()) {
-                            message.getModel().wait();
-                        }
-                }catch (InterruptedException e){ terminate();}
-                double d = Math.random();
-                if (message.getStudent().getStatus().equals("MSc")) {
-                    if (d >= 0.6) message.getModel().setResult("Bad");
-                    else message.getModel().setResult("Good");
-                }
-                else if (message.getStudent().getStatus().equals("PhD")) {
-                    if (d >= 0.8) message.getModel().setResult("Bad");
-                    else message.getModel().setResult("Good");
-                }
-            complete(message, message.getModel());
-            message.getModel().setStatus("Tested");
+            else{ testModelEvent = message; handelingTest();
         }});
         subscribeBroadcast(TickBroadcast.class, message-> {gpu.IncreaseTick();
             if(gpu.isFinished()) {
                 Model m = gpu.getModel();
                 gpu.setModel(null);
-                complete(trainModelEvent, m);}});
-        subscribeBroadcast(TerminateBroadcast.class, message-> {terminate();});
+                complete(trainModelEvent, m);}
+            if(testModelEvent!=null) handelingTest();
+        });
+        subscribeBroadcast(TerminateBroadcast.class, message-> {terminate();
+            System.out.println("               "+Thread.currentThread().getName()+" terminated");});
     }
 
     @Override
@@ -78,6 +67,23 @@ public class GPUService extends MicroService {
         if (gpu.isInTheMiddleOfTraining() | notTickEvents.isEmpty())
             return super.awaitMessage();
         else return notTickEvents.remove();
+    }
+
+    private void handelingTest(){
+        if (testModelEvent.getModel().getStatus() == "Trained"){
+        double d = Math.random();
+        if (testModelEvent.getStudent().getStatus().equals("MSc")) {
+            if (d >= 0.6) testModelEvent.getModel().setResult("Bad");
+            else testModelEvent.getModel().setResult("Good");
+        }
+        else if (testModelEvent.getStudent().getStatus().equals("PhD")) {
+            if (d >= 0.8) testModelEvent.getModel().setResult("Bad");
+            else testModelEvent.getModel().setResult("Good");
+        }
+        complete(testModelEvent, testModelEvent.getModel());
+        testModelEvent.getModel().setStatus("Tested");}
+        testModelEvent=null;
+
     }
 
     }

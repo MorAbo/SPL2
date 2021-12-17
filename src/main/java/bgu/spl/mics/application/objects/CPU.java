@@ -34,6 +34,7 @@ public class CPU {
      * @pre (tick)==@post(tick)-1
      */
     public void IncreaseTick(){
+//        System.out.println(Thread.currentThread().getName()+" TICK");
         if(timeLeftToProcessBatch>0) cluster.IncreaseCpuRunTime();
         timeLeftToProcessBatch=timeLeftToProcessBatch-1;
         timeLeftToProcessBatch=Math.max(0, timeLeftToProcessBatch--);
