@@ -56,8 +56,9 @@ public class ConferenceService extends MicroService {
         super.shut();
         LinkedList<ModelOutput> modelOutputs= new LinkedList<>();
         for (Model m: confrenceInformation.getModels()){
+            if (m.getResult()=="Good"){
             modelOutputs.add(new ModelOutput(m.getName(),m.GetData(), m.getStatus(), m.getResult()));
-        }
+        }}
         ConferenceOutput cop = new ConferenceOutput(confrenceInformation.getName(), confrenceInformation.getDate(), modelOutputs);
         JSONOutput.GetInstance().addConferenceOutputs(cop);
     }

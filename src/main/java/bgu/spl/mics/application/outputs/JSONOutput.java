@@ -54,13 +54,46 @@ public class JSONOutput {
         jsonObject.add("conferences", conArray);
         jsonObject.addProperty("cpuTimeUsed", cpuTimeUsed);
         jsonObject.addProperty("gpuTimeUsed", gpuTimeUsed);
-
-
-
         jsonObject.addProperty("batchesProcessed", batchesProcessed);
 
-        try (FileWriter file = new FileWriter("assignment2.json")){
-            file.write(jsonObject.toString());
+        List<String> jsonList = new LinkedList<>();
+        String jsonString = jsonObject.toString();
+        int tab = 0;
+        StringBuilder temp = new StringBuilder();
+        for (int i = 0; i < jsonString.length(); i++) {
+//            if (jsonString.charAt(i) != ){
+            temp.append(jsonString.charAt(i));
+//            }
+            if (jsonString.charAt(i) == '[' | jsonString.charAt(i) == '{'){
+                String tabString = " ";
+                String repeated = new String(new char[tab]).replace("\0", tabString);
+                temp.insert(0, repeated);
+                tab += 4;
+                jsonList.add(temp.toString());
+                temp = new StringBuilder();
+            }
+            else if (jsonString.charAt(i) == ']' | jsonString.charAt(i) == '}'){
+                String tabString = " ";
+                String repeated = new String(new char[tab]).replace("\0", tabString);
+                temp.insert(0, repeated);
+                tab -= 4;
+                jsonList.add(temp.toString());
+                temp = new StringBuilder();
+            }
+            else if (jsonString.charAt(i) == ','){
+                String tabString = " ";
+                String repeated = new String(new char[tab]).replace("\0", tabString);
+                temp.insert(0, repeated);
+                jsonList.add(temp.toString());
+                temp = new StringBuilder();
+            }
+        }
+
+        try (FileWriter file = new FileWriter("assignment2.txt")){
+            for (String s : jsonList) {
+                file.write(s);
+                file.write("\n");
+            }
             file.flush();
         }
         catch (IOException e){

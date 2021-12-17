@@ -23,7 +23,7 @@ public class ModelOutput {
         JsonObject dataObject = new JsonObject();
         dataObject.addProperty("type", data.getType());
         dataObject.addProperty("size", data.getSize());
-        jsonObject.addProperty("data", String.valueOf(dataObject));
+        jsonObject.add("data", dataObject);
         jsonObject.addProperty("status", status);
         jsonObject.addProperty("results", result);
         return jsonObject;
