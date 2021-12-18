@@ -188,6 +188,10 @@ public class GPU {
      */
     public boolean isFinished(){
         if (!isFinished) return false;
-        else {isFinished=false; return true; }}
+        else {isFinished=false; return true; }
+    }
+
+
+    public int getTimeLeftForBatch(){return TimeLeftForBatch;}
 
 }
