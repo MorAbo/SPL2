@@ -39,5 +39,4 @@ public class ConfrenceInformation {
             modelsName.add(models.get(i).getName());
         }
         return modelsName;}
-
 }

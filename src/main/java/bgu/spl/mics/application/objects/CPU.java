@@ -76,4 +76,12 @@ public class CPU {
             processingBatch = null;
         }
     }
+
+    public int getTimeLeftToProcessBatch(){
+        return timeLeftToProcessBatch;
+    }
+
+    public DataBatch getProcessingBatch(){
+        return processingBatch;
+    }
 }

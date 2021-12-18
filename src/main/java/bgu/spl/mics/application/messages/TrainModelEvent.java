@@ -30,4 +30,5 @@ public class TrainModelEvent implements Event<Model> {
 //    public boolean isResolved(){return f.isDone();}
     public Model getModel(){return m;}
     public void SetFuture(Future<Model> f){ this.f=f;}
+    public Future<Model> getFuture(){return f;}
 }
