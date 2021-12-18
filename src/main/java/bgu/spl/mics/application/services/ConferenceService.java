@@ -1,6 +1,7 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.ReadWriteList;
 import bgu.spl.mics.application.messages.PublishResultEvent;
 import bgu.spl.mics.application.messages.TerminateBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
@@ -55,10 +56,11 @@ public class ConferenceService extends MicroService {
     protected void shut(){
         super.shut();
         LinkedList<ModelOutput> modelOutputs= new LinkedList<>();
-        for (Model m: confrenceInformation.getModels()){
-            if (m.getResult()=="Good"){
+        ReadWriteList<Model> goodModels = confrenceInformation.getModels();
+        for (int i=0; i<goodModels.size(); i++){
+            Model m=goodModels.get(i);
             modelOutputs.add(new ModelOutput(m.getName(),m.GetData(), m.getStatus(), m.getResult()));
-        }}
+        }
         ConferenceOutput cop = new ConferenceOutput(confrenceInformation.getName(), confrenceInformation.getDate(), modelOutputs);
         JSONOutput.GetInstance().addConferenceOutputs(cop);
     }

@@ -17,14 +17,16 @@ public class DataBatch {
         processed = false;
     }
 
+    public Data getData() { return data; }
+    public String getType(){return data.getType();}
+
+    /**
+     * processed the batch be increacing the process field by 1000 or the amount thats left
+     */
     public void ProcessData(){
         int amount = Math.min(1000, data.getSize()-start_index);
         data.ProcessData(amount);
         processed = true;
     }
 
-    public Data getData() { return data; }
-
-    public boolean isProcessed(){return processed;}
-    public String getType(){return data.getType();}
 }

@@ -23,7 +23,6 @@ public class Student {
     private Degree status;
     private int publications;
     private int papersRead;
-
     private List<Model> models;
 
     public Student(String name, String department, String degree){
@@ -35,23 +34,25 @@ public class Student {
         setDegree(degree);
     }
 
+    public String getName(){return name;}
+    public String getStatus(){ return status.toString();}
+    public List<Model> getModels() {return models;}
+    public String getDepartment() { return department;}
+    public int getPublications() {return publications;}
+    public int getPapersRead() { return papersRead;}
+
     public void addModel(Model model){
         models.add(model);
     }
-    public String getName(){return name;}
-    private void setDegree(String degree){
-        if(degree.equals("MSc")){
-            status = Degree.MSc;
-        }
-        else{
-            status = Degree.PhD;
-        }
-    }
-    public String getStatus(){ return status.toString();}
 
-    public List<Model> getModels() {
-        return models;
+    public void IncreasePublication(){publications++;}
+    public void IncreasePapersRead(){papersRead++;}
+
+    private void setDegree(String degree){
+        if(degree.equals("MSc"))status = Degree.MSc;
+        else status = Degree.PhD;
     }
+
 
     public boolean isMyModel(String name){
         for (Model m: models)
@@ -66,9 +67,4 @@ public class Student {
         return null;
     }
 
-    public void IncreasePublication(){publications++;}
-    public void IncreasePapersRead(){papersRead++;}
-    public String getDepartment() { return department;}
-    public int getPublications() {return publications;}
-    public int getPapersRead() { return papersRead;}
 }

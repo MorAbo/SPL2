@@ -24,6 +24,7 @@ public class GPU {
     private double batchesLeftToProcessForModel;
     private boolean isTrainingBatch;
     private boolean isFinished;
+    private int CalTime;
 
 
     public GPU(String type){
@@ -37,6 +38,22 @@ public class GPU {
         batchesLeftToProcessForModel=0;
         isTrainingBatch=false;
         isFinished=false;
+        CalTime= calTime();
+    }
+
+    public Model getModel(){return model;}
+    public boolean isInTheMiddleOfTraining(){
+        return model!=null;
+    }
+    public int getTime2train(){return time2train;}
+
+
+    private int calTime(){
+        if (type.equals(Type.RTX3090))
+            return 1;
+        if(type.equals(Type.RTX2080))
+            return 2;
+        else return 4;
     }
 
     private Type setType(String type){
@@ -56,7 +73,7 @@ public class GPU {
     }
 
     /**
-     *
+     *sets the model with @model and restart the training fields- isFinished, batchesLeftToProcess
      * @param model = model to operate on.
      * @post model == model
      */
@@ -67,7 +84,6 @@ public class GPU {
             batchesLeftToProcessForModel=Math.ceil((float)(model.GetData().getSize())/1000);
         else batchesLeftToProcessForModel=Integer.MAX_VALUE;
     }
-    public Model getModel(){return model;}
 
     /**
      * @return how many more batches i can add to the vram
@@ -79,25 +95,22 @@ public class GPU {
     }
 
     /**
-     *increase the tick by 1
-     * @pre (tick)==@post(tick)-1
+     *if in the middle of training a model decreases the time left to train by 1
+     * if in the middle of training a batch decreasing the time left for training the batch
+     * and increaces the GPURuntime in the cluster by 1
+     * if TimeLeftForBatch = 0 calles the finishedTrainingBatch function
      */
     public void IncreaseTick() {
-//        System.out.println("               "+Thread.currentThread().getName()+" TICK");
-        time2train= Math.max(0, time2train--);
+        time2train=time2train-1;
+        time2train= Math.max(0, time2train);
         if (TimeLeftForBatch>0) cluster.IncreaseGpuRunTime();
         TimeLeftForBatch=TimeLeftForBatch-1;
         TimeLeftForBatch=Math.max(0, TimeLeftForBatch);
         if (TimeLeftForBatch==0) finishedTrainingBatch();
     }
 
-
-
     /**
-    divided the data in model to batches of 1000 and
-    stores it in the disk
-     * @pre DISK.isEmpty();
-     * @post DISK.size() == Math.ceil(model.data.size() / 1000)
+    divided the data in model to batches of 1000 sends them one by one to the cluster
      */
     private void divideData(){
         for (int i=0; i<model.GetData().getSize(); i+=1000){
@@ -106,21 +119,21 @@ public class GPU {
     }
 
     /**
-     * after the cluster completed the task it will set the future of TrainModelEvent
-     * as complete.
-     * @pre (VRAM.size())+1 = @post(vram.size())
+     * after the batch has completed the process it will return the the gpu
+     * the gpu will insert it to the vram and update the time2train.
+     * if we are not in the middle of trainig a batch it will remove the batch from the vram
+     * and train it
      */
     public void receiveProcessedDataBatch(DataBatch data){
         synchronized (VRAM){
-        VRAM.add(data);
-        time2train+=CalTime(data);
-        if(!isTrainingBatch){ TrainBatch(VRAM.pop()); }
+            VRAM.add(data);
+            time2train+=CalTime;
+            if(!isTrainingBatch){ TrainBatch(VRAM.pop()); }
     }}
 
     /**
-     * train the processed data batch by batch
-     * @return the trained model
-     * @post (Model.data.processed) = model.data.size
+     * starts the new model training:
+     * sets model, sets its status to training, and calls divide dada
      */
     public void Train(Model m){
         setModel(m);
@@ -128,35 +141,27 @@ public class GPU {
         divideData();
     }
 
-    private boolean isThereAnythingToProcess() {
-        if (!VRAM.isEmpty()) return true;
-        else for (DataBatch db: cluster.GetProcessedData(this))
-            VRAM.add(db);
-        return !VRAM.isEmpty();
-    }
-
-    public boolean isInTheMiddleOfTraining(){
-        return model!=null;
-    }
     /**
-     * trains a databatch
-     * (train=wait the appropriate amount of ticks)
+     * statrs the trainig of a new Batch
+     * sets training now to @db, initialize the TimeLeftForBatch and
+     * sets isTrainingBatch to true
      * @param db the databatch to train
      */
     private void TrainBatch(DataBatch db){
         training_now=db;
-        TimeLeftForBatch=CalTime(db);
+        TimeLeftForBatch=CalTime;
         isTrainingBatch=true;
     }
 
-    private int CalTime(DataBatch db){
-        if (type.equals(Type.RTX3090))
-            return 1;
-        if(type.equals(Type.RTX2080))
-            return 2;
-        else return 4;
-    }
 
+    /**
+     * finishes the training of a batch.
+     * decreases the batchesLeftToProcessForModel, if batchesLeftToProcessForModel=0
+     * calls the function that finishes training the model
+     * also it starts the training of the next batch from the Vram,
+     * if there is none it will set training_now to be null and
+     * isTrainingBatch to be false;
+     */
     private void finishedTrainingBatch(){
         batchesLeftToProcessForModel--;
         if (batchesLeftToProcessForModel==0) finishedModel();
@@ -166,16 +171,23 @@ public class GPU {
         }
     }
 
+    /**
+     * sets the model status to trained
+     * sets isFinished to true
+     */
     private void finishedModel(){
-        cluster.addTrainedModel(model.getName());
         model.setStatus("Trained");
         isFinished=true;
-        System.out.println("finished Model "+ model.getName());
     }
 
+    /**
+     * returns wether the trainig is finished.
+     * if it is finished it will return true and restart the
+     * isFinished flag to false;
+     * @return
+     */
     public boolean isFinished(){
         if (!isFinished) return false;
         else {isFinished=false; return true; }}
-    public int getTime2train(){return time2train;}
 
 }

@@ -28,7 +28,7 @@ public class TestModelEvent implements Event<Model> {
         synchronized (m){m.notifyAll();}
     }
     public boolean isSent(){return f!=null;}
-    public boolean isResolved(){return f.isDone();}
+//    public boolean isResolved(){return f.isDone();}
     public void setFuture(Future<Model> f) {
         this.f=f;
     }

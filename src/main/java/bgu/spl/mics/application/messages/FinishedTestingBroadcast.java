@@ -3,7 +3,7 @@ package bgu.spl.mics.application.messages;
 import bgu.spl.mics.Broadcast;
 
 public class FinishedTestingBroadcast implements Broadcast {
-    String modelName;
+    private String modelName;
 
     public FinishedTestingBroadcast(String m){
         this.modelName=m;

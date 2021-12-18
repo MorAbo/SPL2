@@ -35,6 +35,7 @@ public class Future<T> {
      */
 	public void resolve (T result) {
 		this.result=result;
+
 	}
 	
 	/**
@@ -55,9 +56,11 @@ public class Future<T> {
      * 	       wait for {@code timeout} TimeUnits {@code unit}. If time has
      *         elapsed, return null.
      */
-	public T get(long timeout, TimeUnit unit) {
-		//TODO: implement this.
-		return null;
+	public T get(long timeout, TimeUnit unit){
+		if (result!=null) return result;
+		try {unit.sleep(timeout); }
+		catch (Exception e){ return result;}
+		return result;
 	}
 
 }

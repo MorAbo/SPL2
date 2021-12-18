@@ -2,10 +2,8 @@ package bgu.spl.mics.application.objects;
 
 import bgu.spl.mics.ReadWriteList;
 import bgu.spl.mics.ReadWriteMap;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.locks.Lock;
 
 /**
  * Passive object representing the cluster.
@@ -19,7 +17,6 @@ public class Cluster {
 	private ReadWriteMap<GPU, ConcurrentLinkedQueue<DataBatch>> unprocessedMap;
 	private ReadWriteMap<GPU, ConcurrentLinkedQueue<DataBatch>> processedMap;
 	private ReadWriteMap<DataBatch, GPU> relevantGpu;
-	private ReadWriteList<String> modelsTrained;
 	private Integer dataBatchesProcessedByCPUs;
 	private Integer cpuTimeUnitsUsed;
 	private Integer gpuTimeUnitsUsed;
@@ -36,7 +33,6 @@ public class Cluster {
 		unprocessedMap=new ReadWriteMap<>(new HashMap<>());
 		processedMap=new ReadWriteMap<>(new HashMap<>());
 		relevantGpu=new ReadWriteMap<>(new HashMap<>());
-		modelsTrained = new ReadWriteList<>();
 		dataBatchesProcessedByCPUs = 0;
 		cpuTimeUnitsUsed = 0;
 		gpuTimeUnitsUsed = 0;
@@ -51,26 +47,38 @@ public class Cluster {
 		return ClusterHolder.INSTANCE;
 	}
 
-	public void IncreaseCpuRunTime() {
-		synchronized (cpuTimeUnitsUsed){
-		cpuTimeUnitsUsed++;}
-	}
-	public void IncreaseGpuRunTime() {
-		synchronized (gpuTimeUnitsUsed){
-		gpuTimeUnitsUsed++;}
-	}
-	public void IncreaceDataBatchesProccesed(){
-		synchronized (dataBatchesProcessedByCPUs){dataBatchesProcessedByCPUs++;}
-	}
-	public void addTrainedModel(String name) {
-		modelsTrained.add(name);
-	}
+
 	public int getCpuTimeUnitsUsed(){return cpuTimeUnitsUsed;}
 	public int getDataBatchesProcessedByCPUs() {return dataBatchesProcessedByCPUs;}
 	public int getGpuTimeUnitsUsed(){return gpuTimeUnitsUsed;}
+
 	public void addWaitingCpu(CPU cpu) { waitingCpu.add(cpu); synchronized (this){this.notify();}}
 	public void removeWaitingCpu(CPU cpu){waitingCpu.remove(cpu);}
 
+	//increases cpuRunTime by 1
+	public void IncreaseCpuRunTime() {
+		synchronized (cpuTimeUnitsUsed){cpuTimeUnitsUsed++;}
+	}
+	//increases GpuRunTime by 1
+	public void IncreaseGpuRunTime() {
+		synchronized (gpuTimeUnitsUsed){gpuTimeUnitsUsed++;}
+	}
+	//increases dataBatchesProccessed by 1
+	private void IncreaceDataBatchesProccesed(){
+		synchronized (dataBatchesProcessedByCPUs){dataBatchesProcessedByCPUs++;}
+	}
+
+
+	/**
+	 * gets an unprocessed databatch (from GPU) and adds it to unprocessed map and
+	 * creates a new list for the processed map for the data to go back into.
+	 * in addition adds a pair to the relevantGPU map so the databatch going back would know
+	 * whoms is it.
+	 * if the waiting gpu list is not empty (there are cpus waiting to get batches) we'll
+	 * send one of them a batche from the unprocessed list of @gpu
+	 * @param dataBatch = databatch the cluster received from the gpu
+	 * @param gpu = the gpu who sent the batch
+	 */
 	public void recieveUnprocessedDataBatch(DataBatch dataBatch, GPU gpu) {
 		if (!processedMap.containsKey(gpu))
 			processedMap.put(gpu, new ConcurrentLinkedQueue<>());
@@ -79,18 +87,24 @@ public class Cluster {
 		unprocessedMap.get(gpu).add(dataBatch);
 		relevantGpu.put(dataBatch, gpu);
 		if (unprocessedMap.containsKey(gpu))
-		synchronized (unprocessedMap.get(gpu)) {
-			synchronized (waitingCpu) {
-				if (waitingCpu.size() != 0) {
-					waitingCpu.get(0).recieveUnprocessedBatch(unprocessedMap.get(gpu).poll());
-					if (unprocessedMap.get(gpu).isEmpty()) unprocessedMap.remove(gpu);
-					///unprocessedMap.get(gpu).remove(dataBatch);
+			synchronized (unprocessedMap.get(gpu)) {
+				synchronized (waitingCpu) {
+					if (waitingCpu.size() != 0) {
+						waitingCpu.get(0).recieveUnprocessedBatch(unprocessedMap.get(gpu).poll());
+						if (unprocessedMap.get(gpu).isEmpty()) unprocessedMap.remove(gpu);
+					}
 				}
 			}
-		}
 	}
 
-
+	/**
+	 * recieves a prossed databatch from a cpu.
+	 * we'll find the relavent gpu whos databatch belongs to and if the gpu's VRAM
+	 * has place well send the batch to the GPU, othewise we'll add the batch to the
+	 * processed map in the key of the gpu.
+	 * in addition we'll increase the number of batched processed
+	 * @param db = the databatch we recieved from the cpu
+	 */
 	public void RecieveProcessedDataBatch(DataBatch db) {
 			GPU relevantGPU = relevantGpu.remove(db);
 			if (relevantGPU.VramCapacityLeft() > 0)
@@ -99,16 +113,11 @@ public class Cluster {
 			IncreaceDataBatchesProccesed();
 	}
 
-	public LinkedList<DataBatch> GetProcessedData(GPU gpu){
-		LinkedList<DataBatch> ans = new LinkedList<>();
-		int count = 0;
-		while (!processedMap.get(gpu).isEmpty() & gpu.VramCapacityLeft()>count){
-			ans.add(processedMap.get(gpu).remove()); count++;}
-		if (processedMap.get(gpu).isEmpty()& !unprocessedMap.containsKey(gpu))
-			processedMap.remove(gpu);
-		return ans;
-	}
-
+	/**
+	 * choose the most precent attach to train by how long will it take for its gpu to finished training its remaining batches.
+	 * and removes the batch from the unproccessed map of the chosen gpu
+	 * @return the batch to process
+	 */
 	public DataBatch getNextDataBatchFromCluster(){
 		try {
 			GPU gpu = chooseGpu();
@@ -119,6 +128,10 @@ public class Cluster {
 
 	}
 
+	/**
+	 * chooses the most precent gpu to proccess a batch from
+	 * @return the gpu we found.
+	 */
 	private GPU chooseGpu(){
 		Iterator<Map.Entry<GPU, ConcurrentLinkedQueue<DataBatch>>> it =unprocessedMap.getSet().iterator();
 		GPU target=it.next().getKey();
@@ -132,7 +145,4 @@ public class Cluster {
 		}
 		return target;
 	}
-
-	public boolean isThereDataToProcess(){ return !unprocessedMap.isEmpty();}
-
 }

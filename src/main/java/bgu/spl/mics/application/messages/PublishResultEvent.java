@@ -14,14 +14,12 @@ public class PublishResultEvent implements Event<String> {
         f = null;
     }
 
+//    public boolean isModelGood(){return m.IsGood();}
+    public Model getModel(){return m;}
+//    public boolean isSent(){return f!=null;}
     public void Resolve(String s){
         f.resolve(s);
     }
-
-    public boolean isModelGood(){return m.IsGood();}
-
-    public Model getModel(){return m;}
-    public boolean isSent(){return f!=null;}
 
 
 

@@ -5,31 +5,13 @@
             "department":"Computer Science",
             "status":"PhD",
             "publications":0,
-            "papersRead":0,
+            "papersRead":5,
             "trainedModels":[
                 {
                     "name":"Bert",
                     "data":{
                         "type":"Text",
                         "size":1000000}
-                    ,
-                    "status":"Tested",
-                    "results":"Good"}
-                ,
-                {
-                    "name":"GPT4",
-                    "data":{
-                        "type":"Text",
-                        "size":1000000}
-                    ,
-                    "status":"Trained",
-                    "results":"None"}
-                ,
-                {
-                    "name":"GPT5",
-                    "data":{
-                        "type":"Text",
-                        "size":200000}
                     ,
                     "status":"Tested",
                     "results":"Bad"}
@@ -46,11 +28,21 @@
             }
         ,
         {
+            "name":"Zazu",
+            "department":"EE",
+            "status":"PhD",
+            "publications":0,
+            "papersRead":5,
+            "trainedModels":[
+                ]
+            }
+        ,
+        {
             "name":"Simba",
             "department":"Computer Science",
             "status":"MSc",
-            "publications":0,
-            "papersRead":0,
+            "publications":2,
+            "papersRead":3,
             "trainedModels":[
                 {
                     "name":"YOLO10",
@@ -60,6 +52,24 @@
                     ,
                     "status":"Tested",
                     "results":"Good"}
+                ,
+                {
+                    "name":"ResNet9000",
+                    "data":{
+                        "type":"Images",
+                        "size":200000}
+                    ,
+                    "status":"Trained",
+                    "results":"None"}
+                ,
+                {
+                    "name":"LessEfficientNet",
+                    "data":{
+                        "type":"Images",
+                        "size":20000}
+                    ,
+                    "status":"Trained",
+                    "results":"None"}
                 ,
                 {
                     "name":"DensestNet",
@@ -76,8 +86,8 @@
             "name":"Timon",
             "department":"SE",
             "status":"MSc",
-            "publications":0,
-            "papersRead":0,
+            "publications":2,
+            "papersRead":3,
             "trainedModels":[
                 {
                     "name":"Percepetron",
@@ -94,8 +104,8 @@
                         "type":"Tabular",
                         "size":1000000}
                     ,
-                    "status":"Tested",
-                    "results":"Good"}
+                    "status":"Trained",
+                    "results":"None"}
                 ,
                 {
                     "name":"MoreStyleGAN",
@@ -113,17 +123,7 @@
                         "size":500000}
                     ,
                     "status":"Tested",
-                    "results":"Good"}
-                ]
-            }
-        ,
-        {
-            "name":"Zazu",
-            "department":"EE",
-            "status":"PhD",
-            "publications":0,
-            "papersRead":0,
-            "trainedModels":[
+                    "results":"Bad"}
                 ]
             }
         ,
@@ -131,8 +131,8 @@
             "name":"Nala",
             "department":"Computer Science",
             "status":"PhD",
-            "publications":0,
-            "papersRead":0,
+            "publications":1,
+            "papersRead":4,
             "trainedModels":[
                 {
                     "name":"YOLO9000",
@@ -141,7 +141,7 @@
                         "size":100000}
                     ,
                     "status":"Tested",
-                    "results":"Bad"}
+                    "results":"Good"}
                 ,
                 {
                     "name":"VIT2",
@@ -149,54 +149,31 @@
                         "type":"Images",
                         "size":1000000}
                     ,
-                    "status":"Trained",
-                    "results":"None"}
+                    "status":"Tested",
+                    "results":"Bad"}
                 ,
                 {
-                    "name":"MuchMoreEfficientNet",
+                    "name":"DenserNet",
                     "data":{
                         "type":"Images",
-                        "size":20000}
+                        "size":100000}
                     ,
-                    "status":"Trained",
-                    "results":"None"}
+                    "status":"Tested",
+                    "results":"Bad"}
                 ]
             }
         ]
     ,
     "conferences":[
         {
-            "name":"CVPR",
-            "date":30000,
-            "publications":[
-                ]
-            }
-        ,
-        {
-            "name":"ECCV",
-            "date":40000,
-            "publications":[
-                ]
-            }
-        ,
-        {
             "name":"ICML",
-            "date":20000,
+            "date":2000,
             "publications":[
                 {
-                    "name":"YOLO10",
+                    "name":"YOLO9000",
                     "data":{
                         "type":"Images",
-                        "size":200000}
-                    ,
-                    "status":"Tested",
-                    "results":"Good"}
-                ,
-                {
-                    "name":"ConditionalGAN",
-                    "data":{
-                        "type":"Images",
-                        "size":500000}
+                        "size":100000}
                     ,
                     "status":"Tested",
                     "results":"Good"}
@@ -209,21 +186,18 @@
                     ,
                     "status":"Tested",
                     "results":"Good"}
-                ,
+                ]
+            }
+        ,
+        {
+            "name":"NeurIPS",
+            "date":2500,
+            "publications":[
                 {
                     "name":"MoreStyleGAN",
                     "data":{
                         "type":"Images",
                         "size":100000}
-                    ,
-                    "status":"Tested",
-                    "results":"Good"}
-                ,
-                {
-                    "name":"Bert",
-                    "data":{
-                        "type":"Text",
-                        "size":1000000}
                     ,
                     "status":"Tested",
                     "results":"Good"}
@@ -236,12 +210,18 @@
                     ,
                     "status":"Tested",
                     "results":"Good"}
-                ,
+                ]
+            }
+        ,
+        {
+            "name":"CVPR",
+            "date":3000,
+            "publications":[
                 {
-                    "name":"GNN",
+                    "name":"YOLO10",
                     "data":{
-                        "type":"Tabular",
-                        "size":1000000}
+                        "type":"Images",
+                        "size":200000}
                     ,
                     "status":"Tested",
                     "results":"Good"}
@@ -249,20 +229,20 @@
             }
         ,
         {
-            "name":"NeurIPS",
-            "date":25000,
+            "name":"ECCV",
+            "date":4000,
             "publications":[
                 ]
             }
         ,
         {
             "name":"AISTATS",
-            "date":50000,
+            "date":5000,
             "publications":[
                 ]
             }
         ]
     ,
-    "cpuTimeUsed":34785,
-    "gpuTimeUsed":11685,
-    "batchesProcessed":8867}
+    "cpuTimeUsed":38164,
+    "gpuTimeUsed":11144,
+    "batchesProcessed":8619}

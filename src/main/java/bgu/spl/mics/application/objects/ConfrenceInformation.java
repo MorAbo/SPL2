@@ -1,7 +1,7 @@
 package bgu.spl.mics.application.objects;
 
+import bgu.spl.mics.ReadWriteList;
 import java.util.LinkedList;
-import java.util.PrimitiveIterator;
 
 /**
  * Passive object representing information on a conference.
@@ -13,32 +13,31 @@ public class ConfrenceInformation {
     private int EndDate;
     private int StartDate;
     private int tick;
-    private LinkedList<Model> models;
+    private ReadWriteList<Model> models;
 
     public ConfrenceInformation(String name, int EndDate, int StartDate){
         this.name = name;
         this.EndDate = EndDate;
         this.StartDate= StartDate;
-        models=new LinkedList<>();
+        models=new ReadWriteList<>();
         tick=1;
     }
 
     public String getName(){return name;}
-
     public int getDate(){return EndDate;}
+    public ReadWriteList<Model> getModels(){return models;};
 
     public void IncreaseTick(){ tick++; }
 
     public boolean shouldRegister(){ return tick==StartDate;}
     public boolean shouldPublish(){ return tick==EndDate; }
     public void addToModels(Model m){models.add(m);}
+
     public LinkedList<String> publish(){
         LinkedList<String > modelsName= new LinkedList<>();
-        for (Model m:models) {
-            if (m.IsGood()) modelsName.add(m.getName());
-            else models.remove(m);
+        for (int i=0; i< models.size(); i++) {
+            modelsName.add(models.get(i).getName());
         }
         return modelsName;}
-    public LinkedList<Model> getModels(){return models;};
 
 }

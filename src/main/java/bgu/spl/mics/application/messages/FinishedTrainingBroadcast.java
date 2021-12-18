@@ -4,7 +4,7 @@ import bgu.spl.mics.Broadcast;
 import bgu.spl.mics.application.objects.Model;
 
 public class FinishedTrainingBroadcast implements Broadcast {
-    String modelName;
+    private String modelName;
 
     public FinishedTrainingBroadcast(String m){
         this.modelName=m;

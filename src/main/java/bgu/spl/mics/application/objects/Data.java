@@ -23,26 +23,27 @@ public class Data {
     }
 
     public String getType(){ return type.toString();}
-    public int getProcessed(){return processed;}
     public int getSize(){return size;}
-
-    public void ProcessData(int amount){ processed+=amount; }
 
     private void setType(String resultString){
         switch (resultString) {
-            case "images":
             case "Images":
                 type = Type.Images;
                 break;
-            case "text":
             case "Text":
                 type = Type.Text;
                 break;
-            case "tabular":
             case "Tabular":
                 type = Type.Tabular;
                 break;
         }
     }
+
+
+    /**
+     * increaces the processed field by @amount
+     * @param amount = the amount to add to processed
+     */
+    public void ProcessData(int amount){ processed+=amount; }
 
 }

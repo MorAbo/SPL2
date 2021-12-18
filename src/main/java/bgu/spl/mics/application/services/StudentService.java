@@ -51,7 +51,7 @@ public class StudentService extends MicroService {
         });
         subscribeBroadcast(FinishedTestingBroadcast.class, message->{
             Model m = student.getModelByName(message.getModel());
-            if (m!=null){
+            if (m!=null && m.IsGood()){
                 sendEvent(new PublishResultEvent(m));
             }
         });

@@ -1,12 +1,5 @@
 package bgu.spl.mics.application.objects;
 
-import bgu.spl.mics.application.services.CPUService;
-
-import java.util.Base64;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-
 /**
  * Passive object representing a single CPU.
  * Add all the fields described in the assignment as private fields.
@@ -30,33 +23,49 @@ public class CPU {
     //public int getFutureTimeLeft(DataBatch db){return TimeLeft+CalTime(db);}
 
     /**
-     *increase the tick by 1
-     * @pre (tick)==@post(tick)-1
+     *increase the tick by 1 which causes:
+     * 1) if we are in the middle of processing the cluster will increase its cpuRunTime
+     * 2) if we are in the middle of processing well decrese the time left to procccess
+     * 3) if time left to process is 0 well call finishedBatch function
      */
     public void IncreaseTick(){
-//        System.out.println(Thread.currentThread().getName()+" TICK");
         if(timeLeftToProcessBatch>0) cluster.IncreaseCpuRunTime();
         timeLeftToProcessBatch=timeLeftToProcessBatch-1;
-        timeLeftToProcessBatch=Math.max(0, timeLeftToProcessBatch--);
+        timeLeftToProcessBatch=Math.max(0, timeLeftToProcessBatch);
         if (timeLeftToProcessBatch==0 & processingBatch!=null) {
             finishedBatch();}
     }
 
-    public int getCores(){return cores;}
-
+    /**
+     * calculate the time it will take for the data batch to be processed by the cpu
+     * @param db= the databatch to be processed
+     * @return= the time it will take to proccess @db
+     */
     private int CalTime(DataBatch db){
         if(db.getType().equals("Images")) return (32/cores)*4;
         else if(db.getType().equals("Text")) return (32/cores)*2;
         else return (32/cores);
     }
 
+    /**
+     * recieves an unprocessed batch and update the processingBatch to be @db
+     * in addition updated the timeLeftToProcessBatch and removes the cpu from
+     * waitingCpu list in the cluster
+     * @param db = the databatch to be proccessed
+     */
     public void recieveUnprocessedBatch(DataBatch db){
         cluster.removeWaitingCpu(this);
         processingBatch=db;
         timeLeftToProcessBatch=CalTime(db);
     }
 
-    public void finishedBatch(){
+    /**
+     * finished the time it takes to process processingBatch
+     * well call processdata function of processingBatch and return the processed batch
+     * to the cluster. in addition try to get a new batch to process from the clusted. if there is
+     * none insert itself to the waiting cpulist in the cluster
+     */
+    private void finishedBatch(){
         processingBatch.ProcessData();
         cluster.RecieveProcessedDataBatch(processingBatch);
         DataBatch db = cluster.getNextDataBatchFromCluster();

@@ -23,9 +23,11 @@ public class Model {
         setStatus("PreTrained");
         setResult("None");
     }
-    public void ProcessData(int amount){ data.ProcessData(amount);}
     public Data GetData(){ return data;}
     public String getName(){return name;}
+    public String getStatus(){return isTrained.toString();}
+    public String getResult(){return goodOrBad.toString();}
+    public boolean IsGood(){ return goodOrBad==result.Good; }
 
     public void setStatus(String statusString){
         switch (statusString) {
@@ -64,8 +66,5 @@ public class Model {
         }
     }
 
-    public String getStatus(){return isTrained.toString();}
-    public String getResult(){return goodOrBad.toString();}
 
-    public boolean IsGood(){ return goodOrBad==result.Good; }
 }
