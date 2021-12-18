@@ -1,94 +1,21 @@
 {
     "students":[
         {
-            "name":"Zazu",
-            "department":"EE",
-            "status":"PhD",
-            "publications":0,
-            "papersRead":5,
-            "trainedModels":[
-                ]
-            }
-        ,
-        {
-            "name":"Pumba",
-            "department":"Computer Science",
-            "status":"PhD",
-            "publications":4,
-            "papersRead":1,
-            "trainedModels":[
-                {
-                    "name":"Bert",
-                    "data":{
-                        "type":"Text",
-                        "size":1000000}
-                    ,
-                    "status":"Tested",
-                    "results":"Good"}
-                ,
-                {
-                    "name":"GPT4",
-                    "data":{
-                        "type":"Text",
-                        "size":1000000}
-                    ,
-                    "status":"Tested",
-                    "results":"Good"}
-                ,
-                {
-                    "name":"GPT5",
-                    "data":{
-                        "type":"Text",
-                        "size":200000}
-                    ,
-                    "status":"Tested",
-                    "results":"Good"}
-                ,
-                {
-                    "name":"GPT10",
-                    "data":{
-                        "type":"Text",
-                        "size":50000}
-                    ,
-                    "status":"Tested",
-                    "results":"Good"}
-                ]
-            }
-        ,
-        {
-            "name":"Timon",
-            "department":"SE",
-            "status":"MSc",
-            "publications":0,
-            "papersRead":5,
-            "trainedModels":[
-                {
-                    "name":"MoreStyleGAN",
-                    "data":{
-                        "type":"Images",
-                        "size":100000}
-                    ,
-                    "status":"Trained",
-                    "results":"None"}
-                ,
-                {
-                    "name":"ConditionalGAN",
-                    "data":{
-                        "type":"Images",
-                        "size":500000}
-                    ,
-                    "status":"Trained",
-                    "results":"None"}
-                ]
-            }
-        ,
-        {
             "name":"Simba",
             "department":"Computer Science",
             "status":"MSc",
             "publications":1,
-            "papersRead":4,
+            "papersRead":1,
             "trainedModels":[
+                {
+                    "name":"YOLO10",
+                    "data":{
+                        "type":"Images",
+                        "size":200000}
+                    ,
+                    "status":"Tested",
+                    "results":"Bad"}
+                ,
                 {
                     "name":"ResNet9000",
                     "data":{
@@ -119,29 +46,93 @@
             }
         ,
         {
-            "name":"Nala",
-            "department":"Computer Science",
-            "status":"PhD",
-            "publications":0,
-            "papersRead":5,
+            "name":"Timon",
+            "department":"SE",
+            "status":"MSc",
+            "publications":1,
+            "papersRead":1,
             "trainedModels":[
                 {
-                    "name":"MuchMoreEfficientNet",
-                    "data":{
-                        "type":"Images",
-                        "size":20000}
-                    ,
-                    "status":"Trained",
-                    "results":"None"}
-                ,
-                {
-                    "name":"DenserNet",
+                    "name":"MoreStyleGAN",
                     "data":{
                         "type":"Images",
                         "size":100000}
                     ,
                     "status":"Tested",
                     "results":"Bad"}
+                ,
+                {
+                    "name":"ConditionalGAN",
+                    "data":{
+                        "type":"Images",
+                        "size":500000}
+                    ,
+                    "status":"Tested",
+                    "results":"Good"}
+                ]
+            }
+        ,
+        {
+            "name":"Pumba",
+            "department":"Computer Science",
+            "status":"PhD",
+            "publications":0,
+            "papersRead":2,
+            "trainedModels":[
+                {
+                    "name":"Bert",
+                    "data":{
+                        "type":"Text",
+                        "size":1000000}
+                    ,
+                    "status":"Trained",
+                    "results":"None"}
+                ,
+                {
+                    "name":"GPT5",
+                    "data":{
+                        "type":"Text",
+                        "size":200000}
+                    ,
+                    "status":"Trained",
+                    "results":"None"}
+                ,
+                {
+                    "name":"GPT10",
+                    "data":{
+                        "type":"Text",
+                        "size":50000}
+                    ,
+                    "status":"Trained",
+                    "results":"None"}
+                ]
+            }
+        ,
+        {
+            "name":"Zazu",
+            "department":"EE",
+            "status":"PhD",
+            "publications":0,
+            "papersRead":2,
+            "trainedModels":[
+                ]
+            }
+        ,
+        {
+            "name":"Nala",
+            "department":"Computer Science",
+            "status":"PhD",
+            "publications":0,
+            "papersRead":2,
+            "trainedModels":[
+                {
+                    "name":"YOLO9000",
+                    "data":{
+                        "type":"Images",
+                        "size":100000}
+                    ,
+                    "status":"Trained",
+                    "results":"None"}
                 ]
             }
         ]
@@ -161,28 +152,10 @@
                     "results":"Good"}
                 ,
                 {
-                    "name":"GPT10",
+                    "name":"ConditionalGAN",
                     "data":{
-                        "type":"Text",
-                        "size":50000}
-                    ,
-                    "status":"Tested",
-                    "results":"Good"}
-                ,
-                {
-                    "name":"GPT5",
-                    "data":{
-                        "type":"Text",
-                        "size":200000}
-                    ,
-                    "status":"Tested",
-                    "results":"Good"}
-                ,
-                {
-                    "name":"Bert",
-                    "data":{
-                        "type":"Text",
-                        "size":1000000}
+                        "type":"Images",
+                        "size":500000}
                     ,
                     "status":"Tested",
                     "results":"Good"}
@@ -207,14 +180,6 @@
             "name":"ECCV",
             "date":4000,
             "publications":[
-                {
-                    "name":"GPT4",
-                    "data":{
-                        "type":"Text",
-                        "size":1000000}
-                    ,
-                    "status":"Tested",
-                    "results":"Good"}
                 ]
             }
         ,
@@ -226,6 +191,6 @@
             }
         ]
     ,
-    "cpuTimeUsed":38131,
-    "gpuTimeUsed":11719,
-    "batchesProcessed":8468}
+    "cpuTimeUsed":38093,
+    "gpuTimeUsed":10925,
+    "batchesProcessed":6814}

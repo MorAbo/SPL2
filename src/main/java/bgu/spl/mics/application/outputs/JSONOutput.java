@@ -1,5 +1,7 @@
 package bgu.spl.mics.application.outputs;
 
+import bgu.spl.mics.MessageBusImpl;
+import bgu.spl.mics.ReadWriteList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -16,22 +18,24 @@ public class JSONOutput {
 
     }
 
-    private List<StudentOutput> studentOutputs;
-    private List<ConferenceOutput> conferenceOutputs;
+    private ReadWriteList<StudentOutput> studentOutputs;
+    private ReadWriteList<ConferenceOutput> conferenceOutputs;
     private int cpuTimeUsed;
     private int gpuTimeUsed;
     private int batchesProcessed;
 
     private JSONOutput(){
-        this.studentOutputs = new LinkedList<>();
-        this.conferenceOutputs = new LinkedList<>();
+        this.studentOutputs = new ReadWriteList<>();
+        this.conferenceOutputs = new ReadWriteList<>();
         this.cpuTimeUsed = -1;
         this.gpuTimeUsed = -1;
         this.batchesProcessed = -1;
     }
 
-    public void addStudentOutputs(StudentOutput studentOutput){ studentOutputs.add(studentOutput);}
-    public void addConferenceOutputs(ConferenceOutput conferenceOutput){ conferenceOutputs.add(conferenceOutput);}
+    public void addStudentOutputs(StudentOutput studentOutput){
+        synchronized (studentOutput){ studentOutputs.add(studentOutput);}}
+    public void addConferenceOutputs(ConferenceOutput conferenceOutput){
+        synchronized (conferenceOutputs){conferenceOutputs.add(conferenceOutput);}}
     public void setCpuTimeUsed(int cpuTimeUsed){this.cpuTimeUsed=cpuTimeUsed;}
     public void setGpuTimeUsed(int gpuTimeUsed){this.gpuTimeUsed=gpuTimeUsed;}
     public void setBatchesProcessed(int batchesProcessed){this.batchesProcessed=batchesProcessed;}
@@ -40,16 +44,16 @@ public class JSONOutput {
         return JsonOutputHolder.instance;
     }
 
-    public void buildJson(){
+    public synchronized void buildJson(){
         JsonObject jsonObject = new JsonObject();
         JsonArray studentArray = new JsonArray();
-        for (StudentOutput studentOutput: studentOutputs) {
-            studentArray.add(studentOutput.toJson());
-        }
+            for (int i= 0; i<studentOutputs.size(); i++) {
+                studentArray.add(studentOutputs.get(i).toJson());
+            }
         jsonObject.add("students", studentArray);
         JsonArray conArray = new JsonArray();
-        for (ConferenceOutput conferenceOutput: conferenceOutputs) {
-            conArray.add(conferenceOutput.toJson());
+        for (int i=0; i<conferenceOutputs.size(); i++) {
+            conArray.add(conferenceOutputs.get(i).toJson());
         }
         jsonObject.add("conferences", conArray);
         jsonObject.addProperty("cpuTimeUsed", cpuTimeUsed);

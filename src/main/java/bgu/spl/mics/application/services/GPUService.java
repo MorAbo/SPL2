@@ -56,8 +56,7 @@ public class GPUService extends MicroService {
                 sendBroadcast(new FinishedTrainingBroadcast(m.getName()));
             }
         });
-        subscribeBroadcast(TerminateBroadcast.class, message-> {terminate();
-            System.out.println("               "+Thread.currentThread().getName()+" terminated");});
+        subscribeBroadcast(TerminateBroadcast.class, message-> {terminate();});
     }
 
     @Override
